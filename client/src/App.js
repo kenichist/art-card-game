@@ -10,6 +10,8 @@ import CollectorsScreen from './screens/CollectorsScreen';
 import CollectorDetailScreen from './screens/CollectorDetailScreen';
 import AuctionScreen from './screens/AuctionScreen';
 import UploadScreen from './screens/UploadScreen';
+import GalleryScreen from './screens/GalleryScreen';
+
 
 const App = () => {
   return (
@@ -25,6 +27,8 @@ const App = () => {
             <Route path="/collectors/:id" element={<CollectorDetailScreen />} />
             <Route path="/auction" element={<AuctionScreen />} />
             <Route path="/upload" element={<UploadScreen />} />
+            <Route path="/gallery" element={<GalleryScreen />} />
+            <Route path="/gallery/item/:id" element={<GalleryScreen />} />
           </Routes>
         </Container>
       </main>

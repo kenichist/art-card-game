@@ -68,5 +68,6 @@
     "uploadError": "请填写所有{{type}}字段并选择图片",
     "collectorCardsTitle": "收藏家卡片",
     "itemCardsTitle": "拍卖物品",
-    "descriptionCount": "{{count}} 个描述"
+    "descriptionCount": "{{count}} 个描述",
+    "navGallery": "画廊"
   }

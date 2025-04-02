@@ -68,5 +68,6 @@
     "uploadError": "Please fill all {{type}} fields and select an image",
     "collectorCardsTitle": "Collector Cards",
     "itemCardsTitle": "Auction Items",
-    "descriptionCount": "{{count}} description(s)"
+    "descriptionCount": "{{count}} description(s)",
+    "navGallery": "Gallery"
   }
