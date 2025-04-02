@@ -1,0 +1,22 @@
+# Ignore node_modules at the root and in subdirectories like client/ or server/
+**/node_modules/
+
+# Ignore common cache directories
+**/.cache/
+**/.eslintcache
+
+# Ignore build output folders
+/build/
+/dist/
+
+# Log files
+*.log
+npm-debug.log*
+
+
+# Environment variables
+.env*
+!.env.example
+
+.DS_Store
+Thumbs.db
