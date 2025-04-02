@@ -117,24 +117,22 @@ const HomeScreen = () => {
 
       <Row className="my-5">
         <Col md={12}>
-          <Card bg="light">
+        <Card bg="light">
             <Card.Body className="text-center">
-              {/* Use t() for How It Works section */}
-              <Card.Title as="h3">{t('howItWorks')}</Card.Title>
-              <Card.Text>
-                <ol className="text-start">
-                   <li>{t('step1')}</li>
-                   <li>{t('step2')}</li>
-                   <li>{t('step3')}</li>
-                   <li>{t('step4')}</li>
-                   <li>{t('step5')}</li> {/* Added step 5 based on previous examples */}
+                <Card.Title as="h3">{t('howItWorks')}</Card.Title>
+                {/* Remove the <Card.Text> wrapper */}
+                <ol className="text-start" style={{ /* Add margin if needed */ marginTop: '1rem', marginBottom: '1rem' }}>
+                    <li>{t('step1')}</li>
+                    <li>{t('step2')}</li>
+                    <li>{t('step3')}</li>
+                    <li>{t('step4')}</li>
+                    <li>{t('step5')}</li>
                 </ol>
-              </Card.Text>
-              <Button as={Link} to="/auction" variant="success">
-                 {t('startMatchingNow')}
-              </Button>
+                <Button as={Link} to="/auction" variant="success">
+                    {t('startMatchingNow')}
+                </Button>
             </Card.Body>
-          </Card>
+        </Card>
         </Col>
       </Row>
     </Container>

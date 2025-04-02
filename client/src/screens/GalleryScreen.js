@@ -1,174 +1,143 @@
-import React, { Suspense, useState, useEffect, useMemo } from 'react'; // Added useMemo
-import { Canvas } from '@react-three/fiber';
-// Import PointerLockControls and KeyboardControls, remove OrbitControls
-import { PointerLockControls, Html, Environment, Sky, KeyboardControls } from '@react-three/drei';
-import { Container, Alert } from 'react-bootstrap';
-import { useTranslation } from 'react-i18next';
-import axios from 'axios';
-import ModelViewer from '../components/ModelViewer'; // Ensure this path is correct
-import { Player } from '../components/Player'; // Import the new Player component
+import React, { useEffect, useRef, useState } from 'react';
+import { Container, Spinner, Alert } from 'react-bootstrap'; // Keep bootstrap for container/messages
+import { useTranslation } from 'react-i18next'; // Keep translation if needed for messages
 
-// Define keyboard mapping actions (can be moved to a separate constants file if preferred)
-const Controls = {
-  forward: 'forward',
-  backward: 'backward',
-  left: 'left',
-  right: 'right',
-  jump: 'jump', // Kept for potential future use
-}
-
-// Component containing the actual 3D scene elements
-const SceneContent = () => {
-  const { t } = useTranslation();
-  const [items, setItems] = useState([]);
-  const [error, setError] = useState(null);
-  const backendUrl = process.env.REACT_APP_API_URL;
-
-  useEffect(() => {
-    const fetchItemsWithModels = async () => {
-      try {
-        setError(null);
-        if (!backendUrl) {
-          throw new Error("REACT_APP_API_URL is not defined in the environment.");
-        }
-        const { data } = await axios.get(`${backendUrl}/api/items`);
-        const itemsWithModels = data.filter(item => item.modelPath && typeof item.modelPath === 'string' && item.modelPath.trim() !== '');
-        if (itemsWithModels.length === 0) {
-            console.warn("No items found with valid model paths.");
-        }
-        setItems(itemsWithModels);
-      } catch (err) {
-         console.error("Error fetching items:", err);
-         setError(err.response?.data?.message || err.message || "Failed to load item data.");
-      }
-    };
-    fetchItemsWithModels();
-  }, [backendUrl]);
-
-   // Simple grid layout function (remains the same)
-   const gridLayout = (index, totalItems) => {
-      const itemsPerRow = Math.max(3, Math.ceil(Math.sqrt(totalItems)));
-      const spacing = 5;
-      const row = Math.floor(index / itemsPerRow);
-      const col = index % itemsPerRow;
-      const offsetX = (itemsPerRow - 1) * spacing / 2;
-      return [col * spacing - offsetX, 0.1, row * spacing];
-  };
-
-  if (error) {
-    return <Html center><Alert variant="danger">{t('error', { message: error })}</Alert></Html>;
-  }
-
-  return (
-    <>
-      {/* Lighting Setup (remains the same) */}
-      <ambientLight intensity={0.4} />
-      <directionalLight
-        position={[8, 15, 5]}
-        intensity={0.8}
-        castShadow
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
-      />
-      <directionalLight position={[-8, 10, -5]} intensity={0.2} />
-
-      {/* Environment & Background (remains the same) */}
-      <Sky distance={450000} sunPosition={[5, 1, 8]} turbidity={8} rayleigh={6} mieCoefficient={0.005} mieDirectionalG={0.8} />
-      <Environment preset="city" />
-
-      {/* Floor Plane (remains the same) */}
-      <mesh
-        rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, 0, 0]}
-        receiveShadow
-      >
-        <planeGeometry args={[100, 100]} />
-        <meshStandardMaterial color="#cccccc" roughness={0.7} metalness={0.2} />
-      </mesh>
-
-      {/* Render the models (logic remains the same) */}
-      {items.map((item, index) => {
-          const relativePath = item.modelPath?.startsWith('/') ? item.modelPath : `/${item.modelPath || ''}`;
-          const fullModelPath = item.modelPath && backendUrl ? `${backendUrl}${relativePath}` : null;
-          return fullModelPath ? (
-              <Suspense key={item._id || item.id || index} fallback={null}>
-                  <ModelViewer
-                      modelPath={fullModelPath}
-                      position={gridLayout(index, items.length)}
-                      scale={item.modelScale || 0.5}
-                      itemData={item}
-                  />
-              </Suspense>
-          ) : (
-              console.warn(`Skipping item "${item.name}" due to missing or invalid modelPath: ${item.modelPath}`),
-              null
-          );
-      })}
-
-      {/* --- Add Player for movement logic --- */}
-      <Player />
-
-      {/* --- Replace OrbitControls with PointerLockControls --- */}
-      <PointerLockControls />
-    </>
-  );
-};
-
-// Main Gallery Screen Component
 const GalleryScreen = () => {
   const { t } = useTranslation();
+  const unityContainerRef = useRef(null); // Ref for the div that will host Unity
+  const unityInstanceRef = useRef(null); // Ref to store the Unity instance
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Define the keyboard control map using useMemo
-  const map = useMemo(() => [
-    { name: Controls.forward, keys: ['ArrowUp', 'KeyW'] },
-    { name: Controls.backward, keys: ['ArrowDown', 'KeyS'] },
-    { name: Controls.left, keys: ['ArrowLeft', 'KeyA'] },
-    { name: Controls.right, keys: ['ArrowRight', 'KeyD'] },
-    { name: Controls.jump, keys: ['Space'] }, // Keep jump mapping
-  ], []);
+  // --- Configuration: Adjust these based on your Unity Build ---
+  const buildFolderName = "UnityBuild"; // The name of the folder you placed in client/public/
+  const buildBaseName = "UnityBuild";   // The base name of your build files (e.g., UnityBuild.loader.js)
+  // --- End Configuration ---
 
+  // Construct paths relative to the public folder
+  const loaderUrl = `${process.env.PUBLIC_URL}/${buildFolderName}/Build/${buildBaseName}.loader.js`;
+  const config = {
+    dataUrl: `${process.env.PUBLIC_URL}/${buildFolderName}/Build/${buildBaseName}.data`, // Unity will add .br or .gz automatically if server configured
+    frameworkUrl: `${process.env.PUBLIC_URL}/${buildFolderName}/Build/${buildBaseName}.framework.js`, // Unity will add .br or .gz
+    codeUrl: `${process.env.PUBLIC_URL}/${buildFolderName}/Build/${buildBaseName}.wasm`, // Unity will add .br or .gz
+    streamingAssetsUrl: `${process.env.PUBLIC_URL}/${buildFolderName}/StreamingAssets`, // Optional: If you use StreamingAssets
+    // companyName: "DefaultCompany", // Optional: As set in Unity Player Settings
+    // productName: "UnityProject", // Optional: As set in Unity Player Settings
+    // productVersion: "1.0", // Optional: As set in Unity Player Settings
+  };
+
+  useEffect(() => {
+    // Ensure container exists and script isn't already loaded/loading
+    if (!unityContainerRef.current || document.getElementById("unity-loader-script")) {
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+    console.log(`Loading Unity Loader from: ${loaderUrl}`);
+
+    // Create script tag for Unity loader
+    const script = document.createElement("script");
+    script.id = "unity-loader-script"; // Add an ID to prevent multiple loads
+    script.src = loaderUrl;
+    script.async = true;
+
+    // Handle script load success
+    script.onload = () => {
+      console.log("Unity Loader script loaded.");
+      // Check if createUnityInstance is defined globally (standard for recent Unity versions)
+      if (typeof createUnityInstance === "function") {
+        createUnityInstance(unityContainerRef.current, config, (progress) => {
+          console.log(`Unity Loading Progress: ${progress * 100}%`);
+          // You could update a progress bar here if desired
+        }).then((unityInstance) => {
+          console.log("Unity instance created successfully.");
+          unityInstanceRef.current = unityInstance; // Store the instance
+          setIsLoading(false);
+        }).catch((message) => {
+          console.error("Failed to create Unity instance:", message);
+          setError(`Failed to initialize Unity: ${message}`);
+          setIsLoading(false);
+        });
+      } else {
+        const errMsg = "createUnityInstance function not found. Check Unity build and loader script.";
+        console.error(errMsg);
+        setError(errMsg);
+        setIsLoading(false);
+      }
+    };
+
+    // Handle script load error
+    script.onerror = (err) => {
+      const errMsg = `Failed to load Unity Loader script from ${loaderUrl}. Ensure the path is correct and the build files are in the public folder.`;
+      console.error(errMsg, err);
+      setError(errMsg);
+      setIsLoading(false);
+    };
+
+    // Append script to the body to start loading
+    document.body.appendChild(script);
+
+    // --- Cleanup function on component unmount ---
+    return () => {
+      console.log("Unmounting GalleryScreen, attempting to quit Unity instance.");
+      const currentUnityInstance = unityInstanceRef.current;
+      if (currentUnityInstance) {
+        currentUnityInstance.Quit().then(() => {
+          console.log("Unity instance quit successfully.");
+        }).catch((err) => {
+          console.warn("Error quitting Unity instance:", err);
+        });
+        unityInstanceRef.current = null; // Clear the ref
+      }
+
+      // Remove the script tag
+      const loadedScript = document.getElementById("unity-loader-script");
+      if (loadedScript && loadedScript.parentNode) {
+        loadedScript.parentNode.removeChild(loadedScript);
+        console.log("Unity Loader script removed.");
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run only once on mount
+
+  // Calculate container height (similar to previous R3F version)
+  // Adjust '56px' based on your actual Header height if necessary
+  const containerStyle = {
+    height: 'calc(100vh - 56px)',
+    width: '100%', // Ensure it takes full width
+    position: 'relative', // Needed for absolute positioning of loading/error messages
+    padding: 0, // Remove padding if you want Unity full bleed
+    backgroundColor: '#2b2b2b', // Background while loading or if Unity doesn't cover
+    overflow: 'hidden' // Hide potential scrollbars during load/resize
+  };
 
   return (
-    // Container remains the same
-    <Container fluid style={{ height: 'calc(100vh - 56px)', padding: 0, position: 'relative', backgroundColor: '#f0f0f0' }}>
-       {/* --- Wrap Canvas with KeyboardControls --- */}
-      <KeyboardControls map={map}>
-        <Canvas
-          shadows
-          // Remove the camera prop - Player component will manage the camera viewpoint
-          gl={{ preserveDrawingBuffer: true }}
-        >
-          <Suspense fallback={
-            <Html center>
-              <div style={{ color: 'black', backgroundColor: 'rgba(255,255,255,0.7)', padding: '10px 20px', borderRadius: '5px' }}>
-                {t('loading')}...
-              </div>
-            </Html>
-          }>
-            {/* SceneContent contains lights, models, floor, player, and controls */}
-            <SceneContent />
-          </Suspense>
-        </Canvas>
+    <Container fluid style={containerStyle}>
+      {/* Div where the Unity Canvas will be injected */}
+      <div
+          ref={unityContainerRef}
+          id="unity-container"
+          style={{ width: '100%', height: '100%' }} // Ensure div takes full space
+      />
 
-        {/* --- UI Overlay for Pointer Lock Instruction --- */}
-        <div style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          color: 'white',
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          padding: '15px',
-          borderRadius: '8px',
-          textAlign: 'center',
-          fontSize: '16px',
-          pointerEvents: 'none' // Allows clicks to pass through to the canvas
-        }}>
-          {t('clickToNavigate')} {/* Use translation key if available */}
-          <br />
-          (WASD / Arrow Keys to Move, Mouse to Look)
+      {/* Loading Indicator */}
+      {isLoading && (
+        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center', color: 'white' }}>
+          <Spinner animation="border" role="status" style={{ width: '3rem', height: '3rem' }}>
+            <span className="visually-hidden">{t('loading')}...</span>
+          </Spinner>
+          <p className="mt-2">{t('loading')} Unity Gallery...</p>
         </div>
-      </KeyboardControls> {/* Close KeyboardControls */}
+      )}
+
+      {/* Error Message */}
+      {error && !isLoading && (
+         <div style={{ position: 'absolute', top: '10px', left: '10px', right: '10px', zIndex: 10 }}>
+            <Alert variant="danger">{t('error', { message: error })}</Alert>
+         </div>
+      )}
+
     </Container>
   );
 };
