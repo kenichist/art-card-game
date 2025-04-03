@@ -4,8 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 const GalleryScreen = () => {
     const { t } = useTranslation();
-    // REMOVE: const unityContainerRef = useRef(null); // We won't pass the div directly anymore
-    const unityCanvasRef = useRef(null); // <<< NEW: Ref for the canvas element
+    const unityCanvasRef = useRef(null);
     const unityInstanceRef = useRef(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -24,25 +23,19 @@ const GalleryScreen = () => {
         companyName: "DefaultCompany",
         productName: "UnityBuild",
         productVersion: "1.0",
-        // IMPORTANT: Tell Unity loader not to resize canvas itself if you manage it via CSS
-        // Adjust devicePixelRatio if needed on high-DPI screens, start with 1
-        // devicePixelRatio: 1 // <-- Consider adding this if you see resolution issues later
+        // devicePixelRatio: 1 // Consider if needed
     };
 
     useEffect(() => {
-        // Ensure CANVAS ref exists and script isn't already loaded/loading
-        // <<< UPDATED: Check canvas ref now
         if (!unityCanvasRef.current || document.getElementById("unity-loader-script")) {
             console.log("Skipping Unity load: Canvas ref not ready or script exists.");
-            // If the ref isn't ready on first mount, useEffect might run again later if dependencies change (though shouldn't here)
-            // If script exists, we assume loading is in progress or failed/succeeded already.
             return;
         }
 
         setIsLoading(true);
         setError(null);
         console.log(`Loading Unity Loader from: ${loaderUrl}`);
-        console.log(`Canvas element ref:`, unityCanvasRef.current); // Check if it's logged correctly
+        console.log(`Canvas element ref:`, unityCanvasRef.current);
 
         const script = document.createElement("script");
         script.id = "unity-loader-script";
@@ -52,28 +45,27 @@ const GalleryScreen = () => {
         script.onload = () => {
             console.log("Unity Loader script loaded.");
 
-            // --- ADD THIS CHECK ---
-            if (!unityCanvasRef.current) { // <<< UPDATED: Re-check canvas ref just before use
+            if (!unityCanvasRef.current) {
                 console.error("Unity canvas ref became NULL or UNDEFINED inside onload! Aborting.");
                 setError("Unity canvas element disappeared before initialization.");
                 setIsLoading(false);
-                return; // Stop execution
+                return;
             }
-             // --- END CHECK ---
-
 
             if (typeof window.createUnityInstance === "function") {
-                console.log("Attempting to create Unity instance on canvas:", unityCanvasRef.current); // <<< UPDATED: Log canvas element
-                // <<< ***** THE KEY CHANGE IS HERE ***** >>>
-                // Pass the CANVAS ref directly, not the container div ref
+                console.log("Attempting to create Unity instance on canvas:", unityCanvasRef.current);
                 window.createUnityInstance(unityCanvasRef.current, config, (progress) => {
-                    console.log(`Unity Loading Progress: ${progress * 100}%`);
+                    console.log(`Unity Loading Progress: ${Math.round(progress * 100)}%`); // Rounded progress
                 }).then((unityInstance) => {
                     console.log("Unity instance created successfully.");
                     unityInstanceRef.current = unityInstance;
                     setIsLoading(false);
-                    // Optional: Force resize if needed after load, though CSS should handle it
-                    // unityInstance.SendMessage('YourUIManager', 'ScreenResize', JSON.stringify({ width: unityCanvasRef.current.width, height: unityCanvasRef.current.height }));
+                    // Optional: Inform Unity about the canvas size if needed internally
+                    // setTimeout(() => { // Delay slightly if initial size is read too early
+                    //     if (unityInstanceRef.current && unityCanvasRef.current) {
+                    //         unityInstanceRef.current.SendMessage('YourUIManager', 'ScreenResize', JSON.stringify({ width: unityCanvasRef.current.clientWidth, height: unityCanvasRef.current.clientHeight }));
+                    //     }
+                    // }, 100);
                 }).catch((message) => {
                     console.error("Failed to create Unity instance:", message);
                     setError(`Failed to initialize Unity: ${message}`);
@@ -98,7 +90,6 @@ const GalleryScreen = () => {
 
         return () => {
             console.log("Unmounting GalleryScreen, attempting to quit Unity instance.");
-             // --- Enhanced Cleanup ---
             const scriptToRemove = document.getElementById("unity-loader-script");
             if (scriptToRemove && scriptToRemove.parentNode) {
                 scriptToRemove.parentNode.removeChild(scriptToRemove);
@@ -106,58 +97,73 @@ const GalleryScreen = () => {
             } else {
                 console.log("Unity Loader script already removed or not found during cleanup.");
             }
-            // Make sure createUnityInstance isn't somehow cached globally by the loader itself if it failed once?
-            // delete window.createUnityInstance; // Probably too aggressive, but keep in mind if issues persist across navigation
 
             const currentUnityInstance = unityInstanceRef.current;
             if (currentUnityInstance) {
-                 // Important: Set ref to null *before* calling async Quit
-                 unityInstanceRef.current = null;
-                 currentUnityInstance.Quit().then(() => {
+                unityInstanceRef.current = null;
+                currentUnityInstance.Quit().then(() => {
                     console.log("Unity instance quit successfully.");
-                 }).catch((err) => {
-                     // Warn because the component is gone anyway
+                }).catch((err) => {
                     console.warn("Error quitting Unity instance (might be ok if already crashed):", err);
-                 });
+                });
             } else {
                 console.log("No active Unity instance found to quit.");
             }
-            // --- End Enhanced Cleanup ---
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); // Empty dependency array is correct here
 
-    const containerStyle = {
+    // --- STYLING CHANGES START ---
+
+    // Style for the main outer container (fills viewport, centers content)
+    const outerContainerStyle = {
         height: 'calc(100vh - 56px)', // Adjust '56px' based on your Header/Navbar
         width: '100%',
-        position: 'relative',
-        padding: 0,
-        backgroundColor: '#2b2b2b',
-        overflow: 'hidden'
+        padding: 0, // Remove default bootstrap padding if needed
+        backgroundColor: '#2b2b2b', // Background for letterboxing
+        display: 'flex',        // Use flexbox for centering
+        alignItems: 'center',   // Center vertically
+        justifyContent: 'center', // Center horizontally
+        overflow: 'hidden',     // Prevent scrollbars if content somehow overflows
+        position: 'relative',   // Keep for absolute positioning of overlays
     };
 
-    // Style for the canvas element itself
+    // Style for the inner container that enforces the 16:9 aspect ratio
+    const aspectRatioBoxStyle = {
+        position: 'relative', // Needed for child canvas potentially? Good practice.
+        width: '100%',        // Try to take full width first
+        maxWidth: '100%',     // Don't exceed parent width
+        maxHeight: '100%',    // Don't exceed parent height
+        aspectRatio: '16 / 9', // <<< THE KEY: Enforce 16:9 ratio
+        // backgroundColor: '#ff0000' // DEBUG: Add color to see the box
+    };
+
+    // Style for the canvas element itself (fills the aspect ratio box)
     const canvasStyle = {
         width: '100%',
         height: '100%',
         display: 'block', // Prevent potential small gaps below canvas
+        // backgroundColor: '#00ff00' // DEBUG: Add color to see the canvas
     };
 
+    // --- STYLING CHANGES END ---
+
     return (
-        // Container still useful for positioning loading/error messages
-        <Container fluid style={containerStyle} className="unity-container-wrapper"> {/* Added a class for potential CSS targeting */}
+        // Use the outer container style on the Bootstrap Container
+        <Container fluid style={outerContainerStyle} className="unity-outer-container">
 
-            {/* The explicit Canvas element */}
-            {/* <<< UPDATED: Render a canvas and assign the ref >>> */}
-            <canvas
-                ref={unityCanvasRef}
-                id="unity-canvas" // Good practice to have an ID
-                style={canvasStyle}
-                // You might need tabindex if you need keyboard input directly to Unity
-                // tabIndex={1}
-            />
+            {/* Inner div to enforce aspect ratio */}
+            <div style={aspectRatioBoxStyle} className="unity-aspect-ratio-box">
+                {/* The explicit Canvas element fills the aspect ratio box */}
+                <canvas
+                    ref={unityCanvasRef}
+                    id="unity-canvas"
+                    style={canvasStyle}
+                    // tabIndex={1} // Add if keyboard input needed
+                />
+            </div>
 
-            {/* Loading Indicator */}
+            {/* Loading Indicator (positioned relative to outer container) */}
             {isLoading && (
                 <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center', color: 'white', zIndex: 1 }}>
                     <Spinner animation="border" role="status" style={{ width: '3rem', height: '3rem' }}>
@@ -167,7 +173,7 @@ const GalleryScreen = () => {
                 </div>
             )}
 
-            {/* Error Message */}
+            {/* Error Message (positioned relative to outer container) */}
             {error && !isLoading && (
                  <div style={{ position: 'absolute', top: '10px', left: '10px', right: '10px', zIndex: 10 }}>
                     <Alert variant="danger">{t('error', { message: error })}</Alert>
