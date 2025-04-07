@@ -1,13 +1,14 @@
 // --- START OF FILE ItemDetailScreen.js ---
 
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, ListGroup, Button } from 'react-bootstrap';
+// Import Image from react-bootstrap - Although not strictly needed for this fix, it's good practice if you might use it elsewhere
+import { Container, Row, Col, Card, ListGroup, Button, Image } from 'react-bootstrap';
 import { Link, useParams } from 'react-router-dom';
 import axios from 'axios';
-import { useTranslation } from 'react-i18next'; // Import useTranslation
+import { useTranslation } from 'react-i18next';
 
 const ItemDetailScreen = () => {
-  const { t } = useTranslation(); // Get translation function
+  const { t } = useTranslation();
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -20,22 +21,20 @@ const ItemDetailScreen = () => {
         const { data } = await axios.get(`${process.env.REACT_APP_API_URL}/api/items/${id}`);
         setItem(data);
         setLoading(false);
-      } catch (error) {
-        setError(error.response?.data?.message || error.message);
+      } catch (err) { // Renamed to err to avoid conflict with state variable
+        setError(err.response?.data?.message || err.message);
         setLoading(false);
       }
     };
     fetchItem();
   }, [id]);
 
-  // Use t() for loading, error, and not found messages
   if (loading) return <h2>{t('loading')}</h2>;
   if (error) return <h3>{t('error', { message: error })}</h3>;
-  if (!item) return <h3>{t('notFound', { type: t('Item') })}</h3>; // Pass type for context
+  if (!item) return <h3>{t('notFound', { type: t('Item') })}</h3>;
 
   return (
     <Container>
-      {/* Use t() for button text */}
       <Link to="/items" className="btn btn-light my-3">
         {t('goBack')}
       </Link>
@@ -43,13 +42,15 @@ const ItemDetailScreen = () => {
       <Row>
         <Col md={6}>
           <Card>
+            {/* --- MODIFICATION HERE --- */}
+            {/* Removed fluid prop, added 'img-fluid' to className */}
             <Card.Img
               src={item.image}
-              alt={item.name} // Alt text
-              fluid
-              className="p-3"
+              alt={item.name}
+              className="p-3 img-fluid" // Add 'img-fluid' class here
               style={{ maxHeight: '500px', objectFit: 'contain' }}
             />
+            {/* --- END OF MODIFICATION --- */}
           </Card>
         </Col>
 
@@ -57,23 +58,23 @@ const ItemDetailScreen = () => {
           <Card>
             <Card.Body>
               <Card.Title as="h2">{item.name}</Card.Title>
-              {/* Use t() for ID text with interpolation */}
               <Card.Text as="h4">{t('itemId', { id: item.id })}</Card.Text>
 
               <ListGroup variant="flush" className="mt-4">
                 <ListGroup.Item>
-                   {/* Use t() for section title */}
                   <h4>{t('descriptions')}</h4>
                   {item.descriptions.length > 0 ? (
                     <ListGroup variant="flush">
+                      {/* --- MODIFICATION FOR REMOVED VALUE --- */}
                       {item.descriptions.map((desc, index) => (
                         <ListGroup.Item key={index}>
-                          <strong>{desc.attribute}:</strong> {desc.value}{t('valueSuffix')}
+                          {/* Only display the attribute now */}
+                          {desc.attribute}
                         </ListGroup.Item>
                       ))}
+                      {/* --- END OF MODIFICATION --- */}
                     </ListGroup>
                   ) : (
-                    // Use t() for empty state
                     <p>{t('noDescriptions')}</p>
                   )}
                 </ListGroup.Item>
@@ -84,9 +85,7 @@ const ItemDetailScreen = () => {
                 to="/auction"
                 variant="primary"
                 className="mt-4"
-                // block prop is deprecated in Bootstrap 5, use d-grid for block buttons if needed
               >
-                 {/* Use t() for button text */}
                 {t('useInAuction')}
               </Button>
             </Card.Body>

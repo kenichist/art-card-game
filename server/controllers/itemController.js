@@ -1,225 +1,272 @@
-// --- START OF FILE itemController.js ---
+// --- START OF FILE server/controllers/itemController.js ---
 
 const Item = require('../models/itemModel');
-const multer = require('multer'); // Import multer to check for MulterError instance
-const fs = require('fs'); // Needed for potential file deletion on update/delete
+const fs = require('fs'); // Needed for file deletion
 const path = require('path'); // Needed for path joining
 
-// Get all items (remains the same)
-const getItems = async (req, res, next) => { // Added next for error handling consistency
+// --- Helper function to get the absolute path to an image file in client/public/images ---
+const getPublicImagePath = (relativePath) => {
+    // relativePath should start with /images/ e.g., /images/item-123.jpg
+    if (!relativePath || !relativePath.startsWith('/images/')) {
+        return null;
+    }
+    // Go from server/controllers -> server -> project_root -> client/public
+    return path.join(__dirname, '..', '..', 'client', 'public', relativePath);
+};
+
+// --- Helper function to safely delete a file ---
+const deleteFile = (filePath) => {
+    if (!filePath) return;
+    const absolutePath = getPublicImagePath(filePath);
+    if (!absolutePath) {
+        console.warn(`Skipping deletion, invalid path: ${filePath}`);
+        return;
+    }
+    fs.unlink(absolutePath, (err) => {
+        if (err && err.code !== 'ENOENT') { // ENOENT = file already gone, not an error here
+            console.error(`Error deleting file ${absolutePath}:`, err);
+        } else if (!err) {
+             console.log(`Successfully deleted file: ${absolutePath}`);
+        }
+    });
+};
+
+
+// Get all items
+const getItems = async (req, res, next) => {
   try {
     const items = await Item.find({});
     res.json(items);
   } catch (error) {
-    // Pass error to the central error handler
+    console.error("Get Items Error:", error);
+    error.message = `Server error fetching items: ${error.message}`;
     error.status = 500;
     next(error);
   }
 };
 
-// Get item by ID (remains the same)
-const getItemById = async (req, res, next) => { // Added next
+// Get item by ID
+const getItemById = async (req, res, next) => {
   try {
-    const item = await Item.findOne({ id: req.params.id });
+    // Ensure ID is treated as a number for the query
+    const item = await Item.findOne({ id: Number(req.params.id) });
     if (item) {
       res.json(item);
     } else {
       const error = new Error('Item not found');
       error.status = 404;
-      next(error); // Pass 404 error
+      next(error);
     }
   } catch (error) {
+    console.error(`Get Item By ID (${req.params.id}) Error:`, error);
+    error.message = `Server error fetching item by ID: ${error.message}`;
     error.status = 500;
     next(error);
   }
 };
 
-// --- UPDATED Create new item ---
-const createItem = async (req, res, next) => { // Added next
+// Create new item
+const createItem = async (req, res, next) => {
+  console.log('Create Item Request Body:', req.body);
+  console.log('Create Item Request File:', req.file);
+
+  // --- File Handling: Use req.file from upload.single ---
+  if (!req.file) {
+    const error = new Error('Item image file is required.');
+    error.status = 400;
+    return next(error);
+  }
+
+  const imageFile = req.file;
+  let parsedDescriptions; // To store parsed descriptions
+
   try {
     const { id, name, descriptions } = req.body;
 
     // --- Basic Input Validation ---
     if (!id || !name || !descriptions) {
+         // If validation fails after upload, delete the uploaded file
+         fs.unlinkSync(imageFile.path); // Use sync here for simplicity before responding
          const error = new Error('Missing required fields (id, name, descriptions).');
          error.status = 400;
          return next(error);
     }
 
-    // --- File Handling ---
-    // Check if files object exists and if the required 'image' field is present
-    if (!req.files || !req.files.image || req.files.image.length === 0) {
-        const error = new Error('Required item image file is missing.');
+    // --- Check for existing ID ---
+    const numericId = Number(id);
+    if (isNaN(numericId)) {
+        fs.unlinkSync(imageFile.path);
+        const error = new Error('Invalid ID format. ID must be a number.');
         error.status = 400;
-        // If a model was uploaded without image, attempt to delete it (optional cleanup)
-        if (req.files?.model?.[0]?.path) {
-             fs.unlink(req.files.model[0].path, (err) => {
-                 if(err) console.error("Error deleting orphaned model file:", err);
-             });
-        }
         return next(error);
     }
 
-    const imageFile = req.files.image[0];
-    const modelFile = req.files.model ? req.files.model[0] : null; // Model is optional
-
-    // --- Check for existing ID ---
-    const itemExists = await Item.findOne({ id: Number(id) }); // Ensure ID check is numeric
+    const itemExists = await Item.findOne({ id: numericId });
     if (itemExists) {
+      fs.unlinkSync(imageFile.path); // Delete uploaded file if ID exists
       const error = new Error('Item with this ID already exists');
-      error.status = 400;
-       // Delete uploaded files if ID exists
-      fs.unlink(imageFile.path, (err) => { if(err) console.error("Error deleting image file on duplicate ID:", err); });
-      if(modelFile) fs.unlink(modelFile.path, (err) => { if(err) console.error("Error deleting model file on duplicate ID:", err); });
+      error.status = 409; // 409 Conflict is more appropriate
       return next(error);
     }
 
-    // --- Construct web-accessible paths (relative to static serving root) ---
-    // Assumes files are in 'public/uploads/items' and '/uploads' is served
-    const imagePath = `/uploads/items/${imageFile.filename}`;
-    const modelPath = modelFile ? `/uploads/items/${modelFile.filename}` : null;
-
     // --- Parse descriptions ---
-    let parsedDescriptions;
     try {
         parsedDescriptions = JSON.parse(descriptions);
-        if (!Array.isArray(parsedDescriptions)) throw new Error(); // Ensure it's an array
+        // Validate format: should be array of objects with 'attribute' string
+        if (!Array.isArray(parsedDescriptions) || parsedDescriptions.some(d => typeof d?.attribute !== 'string')) {
+            throw new Error('Invalid description structure.');
+        }
     } catch (e) {
-        const error = new Error('Invalid descriptions format (must be a JSON array).');
+        fs.unlinkSync(imageFile.path); // Delete uploaded file on format error
+        const error = new Error('Invalid descriptions format. Must be a JSON array like [{"attribute":"desc1"}, {"attribute":"desc2"}].');
         error.status = 400;
-        // Delete uploaded files on format error
-        fs.unlink(imageFile.path, (err) => { if(err) console.error("Error deleting image file on desc error:", err); });
-        if(modelFile) fs.unlink(modelFile.path, (err) => { if(err) console.error("Error deleting model file on desc error:", err); });
         return next(error);
     }
 
+    // --- Construct web-accessible image path ---
+    const imagePath = `/images/${imageFile.filename}`; // Path relative to public root
+
     // --- Create and Save Item ---
     const item = new Item({
-      id: Number(id),
+      id: numericId,
       name,
       image: imagePath,
       descriptions: parsedDescriptions,
-      modelPath: modelPath // Add the model path (will be null if no modelFile)
+      // No modelPath anymore
     });
 
     const createdItem = await item.save();
+    console.log('Item created successfully:', createdItem);
     res.status(201).json(createdItem);
 
   } catch (error) {
-     // Log internal errors, pass to central handler
+     // Catch database errors or other unexpected issues
      console.error("Create Item - Internal Error:", error);
+
+     // Attempt to delete the uploaded file if it exists and wasn't handled above
+     if (imageFile?.path) {
+         try { fs.unlinkSync(imageFile.path); } catch (e) { console.error("Error during cleanup unlink:", e)}
+     }
+
      error.message = `Server error during item creation: ${error.message}`;
-     error.status = error.status || 500; // Keep status if already set (e.g., by Multer)
+     error.status = error.status || 500;
      next(error);
   }
 };
 
-// --- UPDATED Update item ---
-const updateItem = async (req, res, next) => { // Added next
+// Update item
+const updateItem = async (req, res, next) => {
+  console.log('Update Item Request Body:', req.body);
+  console.log('Update Item Request File:', req.file);
+  console.log('Update Item ID:', req.params.id);
+
+  let newImageFile = req.file; // File object if a new image was uploaded
+  let oldImagePath = null; // To store the path of the image being replaced
+
   try {
     const { name, descriptions } = req.body;
-    const itemId = req.params.id;
+    const itemId = Number(req.params.id);
 
-    const item = await Item.findOne({ id: itemId });
-    if (!item) {
-        const error = new Error('Item not found');
-        error.status = 404;
+    if (isNaN(itemId)) {
+        const error = new Error('Invalid Item ID for update.');
+        error.status = 400;
+        // If a file was uploaded with the bad request, delete it
+        if (newImageFile) fs.unlinkSync(newImageFile.path);
         return next(error);
     }
 
-    // Store old paths for potential deletion
-    const oldImagePath = item.image;
-    const oldModelPath = item.modelPath;
+    const item = await Item.findOne({ id: itemId });
+    if (!item) {
+        const error = new Error('Item not found for update');
+        error.status = 404;
+        // If a file was uploaded for a non-existent item, delete it
+        if (newImageFile) fs.unlinkSync(newImageFile.path);
+        return next(error);
+    }
 
-    // --- Handle File Updates ---
-    const imageFile = req.files?.image ? req.files.image[0] : null;
-    const modelFile = req.files?.model ? req.files.model[0] : null;
+    oldImagePath = item.image; // Store the old path before potentially updating
 
     // Update name if provided
-    item.name = name || item.name;
+    if (name) {
+        item.name = name;
+    }
 
     // Update image path if new image uploaded
-    if (imageFile) {
-      item.image = `/uploads/items/${imageFile.filename}`;
-      // Optionally delete old image file
-      if (oldImagePath) {
-        const oldImageFsPath = path.join(__dirname, '..', 'public', oldImagePath);
-        fs.unlink(oldImageFsPath, (err) => { if(err && err.code !== 'ENOENT') console.error("Error deleting old image:", err); });
-      }
+    if (newImageFile) {
+      item.image = `/images/${newImageFile.filename}`;
     }
-
-    // Update model path if new model uploaded
-    if (modelFile) {
-      item.modelPath = `/uploads/items/${modelFile.filename}`;
-       // Optionally delete old model file
-       if (oldModelPath) {
-        const oldModelFsPath = path.join(__dirname, '..', 'public', oldModelPath);
-        fs.unlink(oldModelFsPath, (err) => { if(err && err.code !== 'ENOENT') console.error("Error deleting old model:", err); });
-      }
-    }
-    // Potential logic to remove model (requires frontend to send a flag e.g., removeModel=true)
-    // else if (req.body.removeModel === 'true' && oldModelPath) {
-    //    item.modelPath = null;
-    //    const oldModelFsPath = path.join(__dirname, '..', 'public', oldModelPath);
-    //    fs.unlink(oldModelFsPath, (err) => { if(err && err.code !== 'ENOENT') console.error("Error deleting removed model:", err); });
-    // }
-
 
     // Update descriptions if provided
     if (descriptions) {
         try {
             let parsedDescriptions = JSON.parse(descriptions);
-            if (!Array.isArray(parsedDescriptions)) throw new Error();
+             // Validate format
+            if (!Array.isArray(parsedDescriptions) || parsedDescriptions.some(d => typeof d?.attribute !== 'string')) {
+                 throw new Error('Invalid description structure.');
+            }
             item.descriptions = parsedDescriptions;
         } catch (e) {
-            const error = new Error('Invalid descriptions format.');
+            const error = new Error('Invalid descriptions format on update.');
             error.status = 400;
-            // If files were uploaded in this invalid request, delete them
-             if (imageFile) fs.unlink(imageFile.path, (err) => { if(err) console.error("Error deleting image file on update desc error:", err); });
-             if (modelFile) fs.unlink(modelFile.path, (err) => { if(err) console.error("Error deleting model file on update desc error:", err); });
+            // If a file was uploaded with the bad descriptions, delete it
+            if (newImageFile) fs.unlinkSync(newImageFile.path);
             return next(error);
         }
     }
 
     const updatedItem = await item.save();
+
+    // If update was successful AND a new image was uploaded, delete the old one
+    if (newImageFile && oldImagePath && oldImagePath !== item.image) {
+        deleteFile(oldImagePath); // Use helper to delete the old file
+    }
+
     res.json(updatedItem);
 
   } catch (error) {
      console.error("Update Item - Internal Error:", error);
+     // Attempt to delete newly uploaded file on error during update process
+     if (newImageFile?.path) {
+        try { fs.unlinkSync(newImageFile.path); } catch (e) { console.error("Error during update cleanup unlink:", e)}
+     }
      error.message = `Server error during item update: ${error.message}`;
      error.status = error.status || 500;
      next(error);
   }
 };
 
-// --- UPDATED Delete item ---
-const deleteItem = async (req, res, next) => { // Added next
+// Delete item
+const deleteItem = async (req, res, next) => {
   try {
-    const item = await Item.findOne({ id: req.params.id });
+    const itemId = Number(req.params.id);
+     if (isNaN(itemId)) {
+        const error = new Error('Invalid Item ID for deletion.');
+        error.status = 400;
+        return next(error);
+    }
+
+    // Find the item first to get the image path for deletion
+    const item = await Item.findOne({ id: itemId });
     if (!item) {
         const error = new Error('Item not found for deletion');
         error.status = 404;
         return next(error);
     }
 
-    // --- Delete associated files before removing DB record ---
-    if (item.image) {
-         const imageFsPath = path.join(__dirname, '..', 'public', item.image);
-         fs.unlink(imageFsPath, (err) => { if(err && err.code !== 'ENOENT') console.error("Error deleting image on item delete:", err); });
-    }
-     if (item.modelPath) {
-         const modelFsPath = path.join(__dirname, '..', 'public', item.modelPath);
-         fs.unlink(modelFsPath, (err) => { if(err && err.code !== 'ENOENT') console.error("Error deleting model on item delete:", err); });
-    }
+    const imagePathToDelete = item.image; // Get path before deleting DB record
 
-    // Use deleteOne or deleteMany for modern Mongoose
-    const result = await Item.deleteOne({ id: req.params.id });
+    // Delete the database record
+    const result = await Item.deleteOne({ id: itemId });
 
-    if (result.deletedCount === 0) { // Should not happen if findOne worked, but good check
-        const error = new Error('Item found but failed to delete');
-        error.status = 404; // Or 500
+    if (result.deletedCount === 0) {
+        // Should not happen if findOne worked, but good check
+        const error = new Error('Item found but failed to delete from database');
+        error.status = 500;
         return next(error);
     }
+
+    // If DB deletion successful, delete the associated image file
+    deleteFile(imagePathToDelete); // Use helper
 
     res.json({ message: 'Item removed successfully' });
 
@@ -238,4 +285,4 @@ module.exports = {
   updateItem,
   deleteItem
 };
-// --- END OF FILE itemController.js ---
+// --- END OF FILE server/controllers/itemController.js ---

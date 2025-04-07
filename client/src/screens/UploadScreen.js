@@ -7,101 +7,93 @@ import { useTranslation } from 'react-i18next';
 
 const UploadScreen = () => {
   const { t } = useTranslation();
-  const [itemFile, setItemFile] = useState(null); // For 2D image
-  const [itemModelFile, setItemModelFile] = useState(null); // *** NEW: State for 3D model file ***
+  const [itemFile, setItemFile] = useState(null);
   const [collectorFile, setCollectorFile] = useState(null);
   const [itemName, setItemName] = useState('');
   const [collectorName, setCollectorName] = useState('');
-  const [itemDescriptions, setItemDescriptions] = useState([
-    { attribute: '', value: 0 }
-  ]);
+  // --- UPDATED: Item descriptions state holds only attributes (strings) ---
+  const [itemDescriptions, setItemDescriptions] = useState(['']);
   const [collectorDescriptions, setCollectorDescriptions] = useState([
-    { attribute: '', value: 0 }
+    { attribute: '', value: 0 } // Collector descriptions remain unchanged
   ]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
 
-  // --- Handler functions (addItemDescription, addCollectorDescription, handleItemDescriptionChange, handleCollectorDescriptionChange) remain the same ---
+  // --- UPDATED: Handler for adding an item description ---
   const addItemDescription = () => {
-    setItemDescriptions([...itemDescriptions, { attribute: '', value: 0 }]);
+    setItemDescriptions([...itemDescriptions, '']); // Add an empty string for a new attribute
   };
 
+  // --- Collector description handler remains the same ---
   const addCollectorDescription = () => {
     setCollectorDescriptions([...collectorDescriptions, { attribute: '', value: 0 }]);
   };
 
-  const handleItemDescriptionChange = (index, field, value) => {
+  // --- UPDATED: Handler for changing an item description (attribute) ---
+  const handleItemDescriptionChange = (index, value) => {
     const newDescriptions = [...itemDescriptions];
-    newDescriptions[index][field] = field === 'value' ? Number(value) : value;
+    newDescriptions[index] = value; // Update the string at the given index
     setItemDescriptions(newDescriptions);
   };
 
+  // --- Collector description handler remains the same ---
   const handleCollectorDescriptionChange = (index, field, value) => {
     const newDescriptions = [...collectorDescriptions];
     newDescriptions[index][field] = field === 'value' ? Number(value) : value;
     setCollectorDescriptions(newDescriptions);
   };
-  // --- End of unchanged handlers ---
 
-
-  // --- Updated Item Upload Handler ---
+  // --- Item Upload Handler ---
   const handleItemUpload = async (e) => {
     e.preventDefault();
     setMessage({ type: '', text: '' });
 
-    // Basic validation (model file is optional)
-    if (!itemFile || !itemName || itemDescriptions.some(desc => !desc.attribute || desc.value === undefined)) {
+    // --- UPDATED: Validation for item descriptions (check for empty strings) ---
+    if (!itemFile || !itemName || itemDescriptions.some(desc => !desc.trim())) { // Check if any description is empty or just whitespace
       setMessage({ type: 'danger', text: t('uploadError', { type: t('item') }) });
       return;
     }
 
     const formData = new FormData();
-    formData.append('image', itemFile); // Append 2D image
+    formData.append('image', itemFile);
     formData.append('name', itemName);
-    // Note: ID calculation might be better handled server-side, but keeping client-side logic for now
+
+    let nextId; // Define nextId outside try block to use in message
     try {
         setLoading(true);
         const { data: items } = await axios.get(`${process.env.REACT_APP_API_URL}/api/items`);
-        const nextId = items.length > 0 ? Math.max(...items.map(item => item.id || 0)) + 1 : 1;
+        nextId = items.length > 0 ? Math.max(...items.map(item => item.id || 0)) + 1 : 1;
         formData.append('id', nextId);
     } catch(error) {
         console.error("Failed to fetch items for ID generation:", error);
         setMessage({ type: 'danger', text: "Error determining next ID. Cannot upload."});
         setLoading(false);
-        return; // Stop upload if ID generation fails
+        return;
     }
 
-    formData.append('descriptions', JSON.stringify(itemDescriptions));
-
-    // *** NEW: Conditionally append the 3D model file ***
-    if (itemModelFile) {
-      // Use a distinct key for the model file (e.g., 'model') - ensure backend expects this key
-      formData.append('model', itemModelFile);
-    }
+    // --- UPDATED: Stringify the descriptions (array of strings) ---
+    // Backend controller needs to parse this correctly and map to [{attribute: 'desc1'}, {attribute: 'desc2'}] format for saving
+    const descriptionsToSave = itemDescriptions.map(desc => ({ attribute: desc }));
+    formData.append('descriptions', JSON.stringify(descriptionsToSave));
 
     try {
-      // Axios POST request remains the same endpoint
-      // The backend needs to be updated to handle both 'image' and optionally 'model' files
       await axios.post(`${process.env.REACT_APP_API_URL}/api/items`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
       setMessage({
         type: 'success',
-        text: t('uploadSuccess', { type: t('Item'), id: formData.get('id') }) // Use ID from formData
+        text: t('uploadSuccess', { type: t('Item'), id: nextId }) // Use nextId defined earlier
       });
 
-      // --- Reset form including the new model file input ---
+      // --- Reset form ---
       setItemFile(null);
       setItemName('');
-      setItemDescriptions([{ attribute: '', value: 0 }]);
-      setItemModelFile(null); // *** NEW: Reset model file state ***
+      setItemDescriptions(['']); // Reset to initial state (one empty string)
 
-      // Clear file input elements visually
+      // Clear file input element visually
       const itemFileInput = document.getElementById('itemImage');
       if (itemFileInput) itemFileInput.value = null;
-      const itemModelInput = document.getElementById('itemModelFile'); // *** NEW: Get model input element ***
-      if (itemModelInput) itemModelInput.value = null; // *** NEW: Clear model input element ***
 
     } catch (error) {
       setMessage({
@@ -113,15 +105,15 @@ const UploadScreen = () => {
     }
   };
 
-  // --- Collector Upload Handler (handleCollectorUpload) remains the same ---
+  // --- Collector Upload Handler (remains the same) ---
   const handleCollectorUpload = async (e) => {
      e.preventDefault();
-     setMessage({ type: '', text: '' }); // Clear previous message
+     setMessage({ type: '', text: '' });
 
      if (!collectorFile || !collectorName || collectorDescriptions.some(desc => !desc.attribute || desc.value === undefined)) {
       setMessage({
         type: 'danger',
-        text: t('uploadError', { type: t('collector') }) // Pass 'collector' type for context
+        text: t('uploadError', { type: t('collector') })
       });
       return;
     }
@@ -130,11 +122,11 @@ const UploadScreen = () => {
     formData.append('image', collectorFile);
     formData.append('name', collectorName);
 
+    let nextId; // Define nextId outside try block to use in message
     try {
       setLoading(true);
       const { data: collectors } = await axios.get(`${process.env.REACT_APP_API_URL}/api/collectors`);
-       const nextId = collectors.length > 0 ? Math.max(...collectors.map(c => c.id || 0)) + 1 : 1;
-
+      nextId = collectors.length > 0 ? Math.max(...collectors.map(c => c.id || 0)) + 1 : 1;
 
       formData.append('id', nextId);
       formData.append('descriptions', JSON.stringify(collectorDescriptions));
@@ -164,8 +156,6 @@ const UploadScreen = () => {
        setLoading(false);
     }
   };
-  // --- End of unchanged Collector handler ---
-
 
   // --- Updated JSX Return ---
   return (
@@ -193,61 +183,39 @@ const UploadScreen = () => {
                     placeholder={t('itemNamePlaceholder')}
                     value={itemName}
                     onChange={(e) => setItemName(e.target.value)}
-                    required // Make name required
+                    required
                   />
                 </Form.Group>
 
-                {/* Item Image (2D) Input */}
+                {/* Item Image Input */}
                 <Form.Group controlId="itemImage" className="mb-3">
                   <Form.Label>{t('itemImageLabel')} (Required)</Form.Label>
                   <Form.Control
                     type="file"
-                    accept="image/*" // Accept standard image types
+                    accept="image/*"
                     onChange={(e) => setItemFile(e.target.files[0])}
-                    required // Make image required
+                    required
                   />
                 </Form.Group>
 
-                {/* *** NEW: Item Model (3D) Input *** */}
-                <Form.Group controlId="itemModelFile" className="mb-3">
-                  {/* Add translation key 'itemModelLabel' */}
-                  <Form.Label>{t('itemModelLabel') || '3D Model (.glb, .gltf, optional)'}</Form.Label>
-                  <Form.Control
-                    type="file"
-                    accept=".glb,.gltf" // Hint for accepted file types
-                    onChange={(e) => setItemModelFile(e.target.files[0])}
-                    // NOT required
-                  />
-                </Form.Group>
-
-                {/* Item Descriptions Input */}
+                {/* --- UPDATED: Item Descriptions Input (Attributes Only) --- */}
                 <Form.Label>{t('descriptionsLabel')}</Form.Label>
-                {itemDescriptions.map((desc, index) => (
-                  <Row key={index} className="mb-3">
-                    <Col md={8}>
-                      <Form.Control
-                        placeholder={t('descAttributePlaceholder')}
-                        value={desc.attribute}
-                        onChange={(e) => handleItemDescriptionChange(index, 'attribute', e.target.value)}
-                        required // Make attribute required if description row exists
-                      />
-                    </Col>
-                    <Col md={4}>
-                      <Form.Control
-                        type="number"
-                        placeholder={t('descValuePlaceholder')}
-                        value={desc.value}
-                        onChange={(e) => handleItemDescriptionChange(index, 'value', e.target.value)}
-                        required // Make value required if description row exists
-                        step="any" // Allow decimal values if needed
-                      />
-                    </Col>
-                  </Row>
-                ))}
+                {itemDescriptions.map((descAttribute, index) => (
+                  <Form.Group key={index} className="mb-3">
+                    <Form.Control
+                      placeholder={t('descAttributePlaceholder')}
+                      value={descAttribute} // Bind directly to the string
+                      onChange={(e) => handleItemDescriptionChange(index, e.target.value)}
+                      required // Make attribute required
+                    />
+                  </Form.Group>
+                 ))}
+                 {/* --- End of Updated Item Descriptions --- */}
+
                 <Button variant="secondary" onClick={addItemDescription} className="mb-3 me-2">
                   {t('addDescription')}
                 </Button>
-                 {/* Optional: Add button to remove last description */}
+                 {/* Button to remove last item description */}
                  {itemDescriptions.length > 1 && (
                     <Button variant="outline-danger" onClick={() => setItemDescriptions(itemDescriptions.slice(0, -1))} className="mb-3">
                          Remove Last
@@ -266,9 +234,10 @@ const UploadScreen = () => {
           </Card>
         </Col>
 
-        {/* Collector Upload Form (remains the same structure) */}
+        {/* Collector Upload Form (Structure remains the same) */}
         <Col md={6}>
-          <Card className="mb-4">
+          {/* ... (Collector form JSX remains unchanged) ... */}
+           <Card className="mb-4">
             <Card.Header as="h4">{t('uploadCollector')}</Card.Header>
             <Card.Body>
               <Form onSubmit={handleCollectorUpload}>
@@ -344,4 +313,4 @@ const UploadScreen = () => {
 };
 
 export default UploadScreen;
-// --- END OF FILE UploadScreen.js ---
+// --- END OF FILE src/screens/UploadScreen.js ---
