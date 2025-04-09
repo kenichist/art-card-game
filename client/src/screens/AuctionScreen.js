@@ -1,7 +1,7 @@
 // --- START OF FILE AuctionScreen.js ---
 
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Button, Alert, Image, ListGroup } from 'react-bootstrap';
+import { Container, Row, Col, Card, Button, Alert, ListGroup } from 'react-bootstrap';
 // Import useLocation
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
