@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 // Import Image from react-bootstrap - Although not strictly needed for this fix, it's good practice if you might use it elsewhere
-import { Container, Row, Col, Card, ListGroup, Button, Image } from 'react-bootstrap';
+import { Container, Row, Col, Card, ListGroup, Button } from 'react-bootstrap';
 import { Link, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
