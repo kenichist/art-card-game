@@ -403,3 +403,161 @@ h2.my-4 {
   font-family: 'Cinzel', serif;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .hero-content h1 {
+    font-size: 2rem;
+    padding: 0 1rem;
+  }
+
+  .hero-content .lead {
+    font-size: 1rem;
+    padding: 0 1rem;
+  }
+
+  .page-heading {
+    font-size: 1.5rem;
+    margin: 1.5rem 0;
+    padding: 0 1rem;
+  }
+
+  .card {
+    margin: 0.75rem;
+  }
+
+  .card-img-top, .card-img {
+    height: 200px;
+  }
+
+  .card .card-title,
+  .card-body .card-title {
+    font-size: 1.2rem;
+  }
+
+  .instruction-list {
+    padding-left: 1rem;
+    margin: 1rem;
+  }
+
+  .btn {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Improve touch targets */
+  .nav-link,
+  .btn,
+  .page-link {
+    padding: 0.75rem 1rem;
+  }
+
+  /* Adjust pagination for mobile */
+  .pagination {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .pagination .page-item {
+    margin: 0.25rem;
+  }
+
+  /* Adjust card layouts in grid */
+  .row {
+    margin: 0;
+  }
+
+  [class*="col-"] {
+    padding: 0.5rem;
+  }
+
+  /* Improve form elements on mobile */
+  .form-control {
+    font-size: 16px; /* Prevents iOS zoom on input focus */
+    padding: 0.75rem;
+  }
+
+  /* Adjust spacing for mobile */
+  .container {
+    padding: 0.5rem;
+  }
+
+  .my-4 {
+    margin: 1rem 0;
+  }
+
+  .mb-4 {
+    margin-bottom: 1rem !important;
+  }
+
+  /* Improve table responsiveness */
+  .table-responsive {
+    margin-bottom: 1rem;
+  }
+
+  /* Adjust list group items */
+  .list-group-item {
+    padding: 0.75rem;
+  }
+
+  /* Match result adjustments */
+  .match-result {
+    padding: 1rem;
+  }
+
+  .match-value {
+    font-size: 1.2rem;
+  }
+
+  /* Adjust modal content for mobile */
+  .modal-dialog {
+    margin: 0.5rem;
+  }
+
+  .modal-body {
+    padding: 1rem;
+  }
+
+  /* Alert adjustments */
+  .alert {
+    margin: 0.5rem;
+    padding: 0.75rem;
+  }
+}
+
+/* Tablet specific adjustments */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .card-img-top, .card-img {
+    height: 220px;
+  }
+
+  .hero-content h1 {
+    font-size: 2.25rem;
+  }
+
+  .btn {
+    padding: 0.5rem 1rem;
+  }
+}
+
+/* Additional mobile navigation improvements */
+@media (max-width: 768px) {
+  .navbar-collapse {
+    background: linear-gradient(180deg, #2a2522 0%, #1a1614 100%);
+    padding: 1rem;
+    border-radius: 0 0 8px 8px;
+  }
+
+  .navbar-toggler {
+    border-color: #463931;
+    padding: 0.5rem;
+  }
+
+  .navbar-toggler:focus {
+    box-shadow: 0 0 0 0.2rem rgba(139, 69, 19, 0.25);
+  }
+
+  .navbar-brand {
+    font-size: 1.25rem;
+  }
+}
