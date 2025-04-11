@@ -20,8 +20,7 @@ const Header = () => {
               <Nav.Link as={Link} to="/items">{t('navItems')}</Nav.Link>
               <Nav.Link as={Link} to="/collectors">{t('navCollectors')}</Nav.Link>
               <Nav.Link as={Link} to="/auction">{t('navAuction')}</Nav.Link>
-              {/* Add the link to the 3D Gallery */}
-              <Nav.Link as={Link} to="/gallery">{t('navGallery') || '3D Gallery'}</Nav.Link>
+              {/* Gallery link removed */}
             </Nav>
             <Nav className="ms-auto align-items-center">
               <Button as={Link} to="/upload" variant="outline-light" className="me-2">
