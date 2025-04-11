@@ -312,7 +312,7 @@ const AuctionScreen = () => {
                         <ListGroup variant="flush" className="flex-grow-1">
                           {collector.descriptions.map((desc, index) => (
                              <ListGroup.Item key={index} className="px-0 py-1">
-                                {desc.attribute}: {desc.value}{t('valueSuffix') || ''}
+                                {desc.attribute}: <span className="desc-value">{desc.value}{t('valueSuffix') || ''}</span>
                              </ListGroup.Item>
                           ))}
                        </ListGroup>
@@ -356,7 +356,7 @@ const AuctionScreen = () => {
                   <ListGroup variant="flush">
                     {matchResult.matchedDescriptions.map((desc, index) => (
                        <ListGroup.Item key={index} className="bg-light">
-                        {desc.attribute}: {desc.value}{t('valueSuffix') || ''}
+                        {desc.attribute}: <span className="desc-value">{desc.value}{t('valueSuffix') || ''}</span>
                       </ListGroup.Item>
                     ))}
                   </ListGroup>

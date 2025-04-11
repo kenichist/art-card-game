@@ -1,60 +1,405 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-      sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    background-color: #f8f9fa;
-  }
-  
-  code {
-    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-      monospace;
-  }
-  
-  /* Custom styles for the auction-collector app */
-  .card {
-    transition: transform 0.3s;
-    margin-bottom: 1.5rem;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  }
-  
-  .card:hover {
-    transform: translateY(-5px);
-  }
-  
-  .card-img-top {
-    height: 200px;
-    object-fit: contain;
-    padding: 1rem;
-  }
-  
-  .page-heading {
-    margin: 2rem 0;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #dee2e6;
-  }
-  
-  .auction-card {
-    border-left: 5px solid #0d6efd;
-  }
-  
-  .collector-card {
-    border-left: 5px solid #198754;
-  }
-  
-  .match-result {
-    background-color: #f8f9fa;
-    border-radius: 0.5rem;
-    padding: 1.5rem;
-    margin-top: 2rem;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  }
-  
-  .match-value {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #198754;
-  }
-  
+  margin: 0;
+  font-family: "Noto Serif SC", "Noto Sans SC", -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #1a1a1a;
+  color: #ffffff;
+  background-image: 
+    linear-gradient(rgba(26, 26, 26, 0.97), rgba(26, 26, 26, 0.97)),
+    url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23332b20' fill-opacity='0.4'%3E%3Cpath d='M0 0h20v20H0z'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* Custom styles for the auction-collector app */
+.card {
+  transition: transform 0.3s, box-shadow 0.3s;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, #2a2522 0%, #1a1614 100%);
+  border: 1px solid #463931;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* Fix for button clickability */
+.card .btn,
+.card a {
+  position: relative;
+  z-index: 2;
+}
+
+.card-img-top, .card-img {
+  height: 250px;
+  object-fit: cover;
+  padding: 1rem;
+  background: linear-gradient(135deg, #2a2522 0%, #1a1614 100%);
+  border-bottom: 1px solid #463931;
+}
+
+.page-heading {
+  font-family: 'Cinzel', serif;
+  margin: 2rem 0;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #8b4513;
+  color: #ffd700;
+  font-weight: 600;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  letter-spacing: 1px;
+}
+
+.card-title {
+  font-family: 'MedievalSharp', cursive;
+  font-size: 1.4rem;
+  color: #ffffff;
+  margin-bottom: 0.75rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8),
+               0 0 10px rgba(255, 215, 0, 0.4);
+  letter-spacing: 0.5px;
+}
+
+.card .card-title,
+.card-body .card-title {
+  font-family: 'MedievalSharp', cursive;
+  font-size: 1.4rem;
+  color: #ffffff !important;
+  margin-bottom: 0.75rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.auction-card {
+  border-left: none;
+  border-top: 4px solid #c4a484;
+}
+
+.collector-card {
+  border-left: none;
+  border-top: 4px solid #8b4513;
+}
+
+.match-result {
+  background: linear-gradient(135deg, #2a2522 0%, #1a1614 100%);
+  border: 1px solid #8b4513;
+  color: #ffffff;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 2rem;
+  box-shadow: 0 4px 12px rgba(44, 24, 16, 0.08);
+  border: 1px solid rgba(196, 164, 132, 0.2);
+}
+
+.match-value {
+  font-family: 'Cinzel', serif;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #ffd700;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* New aesthetic elements */
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  background: linear-gradient(45deg, rgba(196, 164, 132, 0.1) 0%, rgba(139, 69, 19, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none; /* Make the overlay non-interactive */
+  z-index: 1;
+}
+
+.card:hover::before {
+  opacity: 1;
+}
+
+.card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(139, 69, 19, 0.15) 0%, rgba(205, 133, 63, 0.15) 100%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+.card:hover::after {
+  opacity: 1;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #8b4513 0%, #654321 100%);
+  border: 1px solid #8b4513;
+  color: #ffd700;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  font-family: 'Cinzel', serif;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  padding: 0.5rem 1.5rem;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #654321 0%, #543210 100%);
+  border-color: #654321;
+  color: #ffd700;
+  box-shadow: 0 0 10px rgba(139, 69, 19, 0.3);
+}
+
+.btn-secondary {
+  background: linear-gradient(135deg, #463931 0%, #2a2522 100%);
+  border: 1px solid #463931;
+  color: #ffffff;
+}
+
+.btn-secondary:hover {
+  background: linear-gradient(135deg, #2a2522 0%, #1a1614 100%);
+  border-color: #2a2522;
+  color: #ffffff;
+}
+
+.nav-link, .btn {
+  font-family: 'Cinzel', serif;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+/* List groups inside cards */
+.list-group-item {
+  background: linear-gradient(135deg, rgba(42, 37, 34, 0.95) 0%, rgba(26, 22, 20, 0.95) 100%);
+  border: 1px solid #8b4513;
+  color: #ffd700 !important;
+  padding: 0.75rem 1rem;
+  margin-bottom: 2px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  font-family: 'MedievalSharp', cursive;
+  font-size: 1.1rem;
+}
+
+.list-group-item strong {
+  color: #ffffff !important;
+  margin-right: 0.5rem;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+}
+
+.navbar {
+  background: linear-gradient(180deg, #2a2522 0%, #1a1614 100%) !important;
+  border-bottom: 1px solid #463931;
+}
+
+.navbar-brand {
+  font-family: 'MedievalSharp', cursive;
+  color: #ffd700 !important;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.nav-link {
+  font-family: 'Cinzel', serif;
+  color: #ffffff !important;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Hero section */
+.hero-content {
+  text-align: center;
+  padding: 3rem 0;
+}
+
+.hero-content h1 {
+  font-family: 'MedievalSharp', cursive;
+  color: #ffd700;
+  font-size: 2.5rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  margin-bottom: 1rem;
+}
+
+.hero-content .lead {
+  color: #ffffff;
+  font-size: 1.2rem;
+  max-width: 800px;
+  margin: 0 auto;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Pagination */
+.pagination .page-link {
+  background-color: #2a2522;
+  border-color: #463931;
+  color: #ffffff;
+}
+
+.pagination .page-item.active .page-link {
+  background-color: #8b4513;
+  border-color: #654321;
+  color: #ffd700;
+}
+
+.container {
+  position: relative;
+}
+
+.container::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(139, 69, 19, 0.1), transparent 70%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.card-text {
+  font-family: 'MedievalSharp', cursive;
+  color: #ffffff !important;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  background: linear-gradient(135deg, rgba(42, 37, 34, 0.95) 0%, rgba(26, 22, 20, 0.95) 100%);
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid rgba(139, 69, 19, 0.3);
+}
+
+/* Also ensure Card.Text inside Card.Body has the same styling */
+.card-body .card-text {
+  font-family: 'MedievalSharp', cursive;
+  color: #ffffff !important;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.card .card-text, 
+.card-body .card-text,
+.card p {
+  font-family: 'MedievalSharp', cursive;
+  color: #ffffff !important;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* Ensure all text elements in cards are white */
+.card-text, 
+.card-body .card-text,
+.card p,
+.card span,
+.card div,
+.list-group-item,
+.pagination .page-link,
+.nav-link {
+  color: #ffffff !important;
+}
+
+/* Instructions and How it Works section */
+.how-it-works {
+  background: linear-gradient(135deg, #2a2522 0%, #1a1614 100%);
+  border: 1px solid #463931;
+  position: relative;
+  overflow: hidden;
+}
+
+.how-it-works::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 200px;
+  background: linear-gradient(180deg, rgba(139, 69, 19, 0.1) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+.instruction-list {
+  font-family: "Noto Serif SC", "Noto Sans SC", -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: #ffffff;
+  font-size: 1.1rem;
+  line-height: 1.8;
+  max-width: 800px;
+  margin: 2rem auto;
+  padding-left: 2rem;
+  position: relative;
+  z-index: 2;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.instruction-list li {
+  margin-bottom: 1rem;
+  padding-left: 1rem;
+  position: relative;
+}
+
+.instruction-list li::marker {
+  color: #ffd700;
+  font-family: 'MedievalSharp', cursive;
+}
+
+/* Links within text */
+a:not(.btn) {
+  color: #ffd700;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+a:not(.btn):hover {
+  color: #ffed4a;
+  text-decoration: underline;
+}
+
+/* Loading and error states */
+h2, h3 {
+  color: #ffffff;
+  font-family: 'Cinzel', serif;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Alert modifications */
+.alert-danger {
+  background: linear-gradient(135deg, #8B0000 0%, #660000 100%);
+  border-color: #990000;
+  color: #FFD700;
+}
+
+.match-result .list-group-item {
+  background: linear-gradient(135deg, rgba(42, 37, 34, 0.95) 0%, rgba(26, 22, 20, 0.95) 100%);
+  border: 1px solid #463931;
+  margin-bottom: 2px;
+}
+
+.my-4 {
+  font-family: 'MedievalSharp', cursive;
+  color: #ffffff;
+  margin: 2rem 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  font-size: 2rem;
+}
+
+/* After the general white text rule, add the more specific selectors */
+.card span.desc-value,
+.list-group-item span.desc-value,
+.card-body span.desc-value {
+  color: #ffd700 !important;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.card h2, 
+.container h2,
+h2.my-4 {
+  color: #ffffff !important;
+  font-family: 'Cinzel', serif;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}

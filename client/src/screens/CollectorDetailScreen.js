@@ -69,7 +69,7 @@ const CollectorDetailScreen = () => {
                     <ListGroup variant="flush">
                       {collector.descriptions.map((desc, index) => (
                         <ListGroup.Item key={index}>
-                          <strong>{desc.attribute}:</strong> {desc.value}{t('valueSuffix')}
+                          <strong>{desc.attribute}:</strong> <span className="desc-value">{desc.value}{t('valueSuffix')}</span>
                         </ListGroup.Item>
                       ))}
                     </ListGroup>
