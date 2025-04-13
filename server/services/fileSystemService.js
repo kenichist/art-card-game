@@ -2,16 +2,23 @@ const fs = require('fs');
 const path = require('path');
 
 // Updated paths to match where you moved the images
-const collectorsPath = path.join(__dirname, '../../client/public/images/collectors');
-const itemsPath = path.join(__dirname, '../../client/public/images/items');
+const baseCollectorsPath = path.join(__dirname, '../../client/public/images/collectors');
+const baseItemsPath = path.join(__dirname, '../../client/public/images/items');
 
 /**
- * Get all collectors from the filesystem
+ * Get all collectors from the filesystem with language support
+ * @param {String} lang Language code ('en' or 'zh')
  * @returns {Array} Array of collector objects
  */
-const getCollectors = () => {
+const getCollectors = (lang = 'en') => {
   try {
-    const files = fs.readdirSync(collectorsPath);
+    // Use the language-specific folders
+    const collectorsPath = path.join(baseCollectorsPath, lang);
+    
+    // Fallback to base folder if language folder doesn't exist
+    const folderToUse = fs.existsSync(collectorsPath) ? collectorsPath : baseCollectorsPath;
+    
+    const files = fs.readdirSync(folderToUse);
     
     const collectors = files
       .filter(file => {
@@ -26,15 +33,16 @@ const getCollectors = () => {
         return {
           id: getCollectorId(file),
           name: `${type} Collector ${id}`,
-          // Updated to use the correct URL path
-          image: `/images/collectors/${file}`,
-          originalPath: path.join(collectorsPath, file)
+          // Updated to use the language-specific path
+          image: `/images/collectors/${lang}/${file}`,
+          originalPath: path.join(folderToUse, file),
+          language: lang
         };
       });
     
     return collectors;
   } catch (error) {
-    console.error('Error reading collectors directory:', error);
+    console.error(`Error reading collectors directory for language ${lang}:`, error);
     return [];
   }
 };
@@ -43,17 +51,12 @@ const getCollectors = () => {
  * Get collector ID from filename (i1.jpg -> 1, p10.jpg -> 10, etc.)
  */
 const getCollectorId = (filename) => {
-  // Extract the type (i, p, s) and number
   const match = filename.match(/^([ips])(\d+)\.jpg$/i);
   if (!match) return 0;
   
   const type = match[1].toLowerCase();
   const number = parseInt(match[2]);
   
-  // Map to ID ranges:
-  // i1-i10: 1-10
-  // p1-p10: 11-20
-  // s1-s10: 21-30
   if (type === 'i') {
     return number;
   } else if (type === 'p') {
@@ -66,12 +69,19 @@ const getCollectorId = (filename) => {
 };
 
 /**
- * Get all items from the filesystem
+ * Get all items from the filesystem with language support
+ * @param {String} lang Language code ('en' or 'zh')
  * @returns {Array} Array of item objects
  */
-const getItems = () => {
+const getItems = (lang = 'en') => {
   try {
-    const files = fs.readdirSync(itemsPath);
+    // Use the language-specific folders
+    const itemsPath = path.join(baseItemsPath, lang);
+    
+    // Fallback to base folder if language folder doesn't exist
+    const folderToUse = fs.existsSync(itemsPath) ? itemsPath : baseItemsPath;
+    
+    const files = fs.readdirSync(folderToUse);
     
     const items = files
       .filter(file => {
@@ -93,86 +103,63 @@ const getItems = () => {
         return {
           id,
           name: `${type} Item ${id}`,
-          // Updated to use the correct URL path
-          image: `/images/items/${file}`,
-          originalPath: path.join(itemsPath, file)
+          // Updated to use the language-specific path
+          image: `/images/items/${lang}/${file}`,
+          originalPath: path.join(folderToUse, file),
+          language: lang
         };
       });
     
     return items;
   } catch (error) {
-    console.error('Error reading items directory:', error);
+    console.error(`Error reading items directory for language ${lang}:`, error);
     return [];
   }
 };
 
 /**
- * Get a collector by ID
+ * Get a collector by ID with language support
  * @param {Number} id Collector ID
+ * @param {String} lang Language code ('en' or 'zh')
  * @returns {Object|null} Collector object or null if not found
  */
-const getCollectorById = (id) => {
-  const collectors = getCollectors();
+const getCollectorById = (id, lang = 'en') => {
+  const collectors = getCollectors(lang);
   return collectors.find(collector => collector.id === parseInt(id)) || null;
 };
 
 /**
- * Get an item by ID
+ * Get an item by ID with language support
  * @param {Number} id Item ID
+ * @param {String} lang Language code ('en' or 'zh')
  * @returns {Object|null} Item object or null if not found
  */
-const getItemById = (id) => {
-  const items = getItems();
+const getItemById = (id, lang = 'en') => {
+  const items = getItems(lang);
   return items.find(item => item.id === parseInt(id)) || null;
 };
 
 /**
- * Ensure the public image directories exist and copy images if needed
+ * Ensure the public image directories exist and copy images for language support
  */
 const ensurePublicDirectories = () => {
-  const publicCollectorsPath = path.join(__dirname, '../public/images/collectors');
-  const publicItemsPath = path.join(__dirname, '../public/images/items');
+  const languages = ['en', 'zh'];
   
-  // Create directories if they don't exist
-  if (!fs.existsSync(publicCollectorsPath)) {
-    fs.mkdirSync(publicCollectorsPath, { recursive: true });
-  }
-  
-  if (!fs.existsSync(publicItemsPath)) {
-    fs.mkdirSync(publicItemsPath, { recursive: true });
-  }
-  
-  try {
-    // Instead of using getCollectors(), which might fail if files are missing,
-    // read directly from the directory
-    const collectorFiles = fs.readdirSync(collectorsPath);
-    collectorFiles.forEach(file => {
-      if (/^[ips][1-9]0?\.jpg$/i.test(file)) {
-        const sourcePath = path.join(collectorsPath, file);
-        const destPath = path.join(publicCollectorsPath, file);
-        if (!fs.existsSync(destPath) && fs.existsSync(sourcePath)) {
-          fs.copyFileSync(sourcePath, destPath);
-        }
-      }
-    });
+  languages.forEach(lang => {
+    const publicCollectorsPath = path.join(__dirname, '../public/images/collectors', lang);
+    const publicItemsPath = path.join(__dirname, '../public/images/items', lang);
     
-    // Same for item images
-    const itemFiles = fs.readdirSync(itemsPath);
-    itemFiles.forEach(file => {
-      if (/^[1-9][0-9]?\.jpg$|^[1-7][0-2]\.jpg$/.test(file)) {
-        const sourcePath = path.join(itemsPath, file);
-        const destPath = path.join(publicItemsPath, file);
-        if (!fs.existsSync(destPath) && fs.existsSync(sourcePath)) {
-          fs.copyFileSync(sourcePath, destPath);
-        }
-      }
-    });
+    // Create directories if they don't exist
+    if (!fs.existsSync(publicCollectorsPath)) {
+      fs.mkdirSync(publicCollectorsPath, { recursive: true });
+    }
     
-    console.log('Public directories ensured and images copied successfully');
-  } catch (error) {
-    console.error('Error in ensurePublicDirectories:', error);
-    // Continue execution even if there's an error
-  }
+    if (!fs.existsSync(publicItemsPath)) {
+      fs.mkdirSync(publicItemsPath, { recursive: true });
+    }
+  });
+  
+  console.log('Public directories ensured for multiple languages');
 };
 
 module.exports = {

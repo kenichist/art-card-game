@@ -34,7 +34,10 @@ const deleteFile = (filePath) => {
 // Get all items
 const getAllItems = async (req, res) => {
   try {
-    const items = getItems().map(item => {
+    // Get language from query parameter, defaulting to 'en'
+    const language = req.query.lang || 'en';
+    
+    const items = getItems(language).map(item => {
       // Add descriptions arrays to maintain compatibility with frontend
       return {
         ...item,
@@ -52,7 +55,10 @@ const getAllItems = async (req, res) => {
 const getItemByIdHandler = async (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    const item = getItemById(id);
+    // Get language from query parameter, defaulting to 'en'
+    const language = req.query.lang || 'en';
+    
+    const item = getItemById(id, language);
     
     if (item) {
       // Add descriptions array to maintain compatibility with frontend

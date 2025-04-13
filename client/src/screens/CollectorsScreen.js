@@ -8,9 +8,11 @@ import FadeInOnScroll from '../components/FadeInOnScroll';
 import { getCollectors } from '../services/fileSystemService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const CollectorsScreen = () => {
   const { t } = useTranslation();
+  const { language } = useLanguage();
   const [collectors, setCollectors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -23,8 +25,7 @@ const CollectorsScreen = () => {
     const fetchCollectors = async () => {
       try {
         setLoading(true);
-        const data = await getCollectors();
-        // Sort collectors by ID
+        const data = await getCollectors(language);
         const sortedData = [...data].sort((a, b) => Number(a.id) - Number(b.id));
         setCollectors(sortedData);
         setLoading(false);
@@ -34,9 +35,8 @@ const CollectorsScreen = () => {
       }
     };
     fetchCollectors();
-  }, []);
+  }, [language]);
 
-  // Filter collectors based on search term
   const filteredCollectors = collectors.filter(collector => 
     collector.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
     getCollectorType(collector.image).toLowerCase().includes(searchTerm.toLowerCase())
@@ -67,10 +67,9 @@ const CollectorsScreen = () => {
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
-    setCurrentPage(1); // Reset to first page when searching
+    setCurrentPage(1);
   };
 
-  // Arrow hover effect handlers
   const handleArrowHover = (direction, isHovering) => {
     setArrowHover(prev => ({...prev, [direction]: isHovering}));
   };
@@ -84,7 +83,6 @@ const CollectorsScreen = () => {
         <h1 className="page-heading my-4">{t('collectorCardsTitle')}</h1>
       </FadeInOnScroll>
 
-      {/* Search Bar */}
       <Row className="mb-4">
         <Col md={6} className="mx-auto">
           <InputGroup>
@@ -107,9 +105,7 @@ const CollectorsScreen = () => {
         </div>
       ) : (
         <>
-          {/* Side Navigation Arrows */}
           <div style={{ position: 'relative' }}>
-            {/* Left Arrow */}
             <div 
               className={`pagination-arrow ${currentPage === 1 ? 'disabled' : ''}`}
               onClick={handlePrevPage}
@@ -139,7 +135,6 @@ const CollectorsScreen = () => {
               <FontAwesomeIcon icon={faChevronLeft} size="lg" className="fade-in-up" />
             </div>
             
-            {/* Right Arrow */}
             <div 
               className={`pagination-arrow ${currentPage >= Math.ceil(filteredCollectors.length / collectorsPerPage) ? 'disabled' : ''}`}
               onClick={handleNextPage}
@@ -171,7 +166,7 @@ const CollectorsScreen = () => {
             
             <Row>
               {currentCollectors.map(collector => (
-                <Col key={collector._id} sm={12} md={6} lg={4} xl={3} className="mb-4">
+                <Col key={collector._id || collector.id} sm={12} md={6} lg={4} xl={3} className="mb-4">
                   <FadeInOnScroll>
                     <Card className="collector-card h-100">
                       <Card.Img
@@ -183,7 +178,7 @@ const CollectorsScreen = () => {
                       <Card.Body>
                         <Card.Title>{collector.name}</Card.Title>
                         <Card.Text>
-                          {t('descriptionCount', { count: collector.descriptions.length })}
+                          {t('descriptionCount', { count: collector.descriptions ? collector.descriptions.length : 0 })}
                         </Card.Text>
                         <Button
                           as={Link}
@@ -201,7 +196,6 @@ const CollectorsScreen = () => {
             </Row>
           </div>
 
-          {/* Pagination */}
           <Row className="mt-4">
             <Col className="d-flex justify-content-center">
               <Pagination>
@@ -223,12 +217,9 @@ const CollectorsScreen = () => {
   );
 };
 
-// Helper function to get collector type from image filename
 const getCollectorType = (imageUrl) => {
-  // Extract filename from image URL
   const filename = imageUrl.split('/').pop();
   
-  // Check if the filename starts with 'i', 'p', or 's'
   if (filename.startsWith('i')) {
     return 'Illustration Collector';
   } else if (filename.startsWith('p')) {

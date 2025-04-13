@@ -4,11 +4,14 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { useTranslation } from 'react-i18next'; // Import useTranslation
+import { useTranslation } from 'react-i18next';
+import { useLanguage } from '../contexts/LanguageContext';
 import FadeInOnScroll from '../components/FadeInOnScroll';
+import { getItems, getCollectors } from '../services/fileSystemService';
 
 const HomeScreen = () => {
-  const { t } = useTranslation(); // Get the translation function
+  const { t } = useTranslation();
+  const { language } = useLanguage();
   const [items, setItems] = useState([]);
   const [collectors, setCollectors] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,18 +21,21 @@ const HomeScreen = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const itemsRes = await axios.get(`${process.env.REACT_APP_API_URL}/api/items`);
-        setItems(itemsRes.data.slice(0, 3));
-        const collectorsRes = await axios.get(`${process.env.REACT_APP_API_URL}/api/collectors`);
-        setCollectors(collectorsRes.data.slice(0, 3));
+        // Use our language-aware service functions instead of axios directly
+        const itemsData = await getItems(language);
+        setItems(itemsData.slice(0, 3));
+        
+        const collectorsData = await getCollectors(language);
+        setCollectors(collectorsData.slice(0, 3));
+        
         setLoading(false);
       } catch (error) {
-        setError(error.response?.data?.message || error.message);
+        setError(error.message);
         setLoading(false);
       }
     };
     fetchData();
-  }, []);
+  }, [language]); // Re-fetch when language changes
 
   // Use t() for loading and error messages
   if (loading) return <h2>{t('loading')}</h2>;
@@ -53,7 +59,7 @@ const HomeScreen = () => {
             <h2 className="page-heading">{t('featuredItems')}</h2>
             <Row>
               {items.map(item => (
-                <Col key={item._id} md={12} className="mb-3">
+                <Col key={item._id || item.id} md={12} className="mb-3">
                   <FadeInOnScroll>
                     <Card className="h-100 item-card">
                       <Row>
@@ -91,7 +97,7 @@ const HomeScreen = () => {
             <h2 className="page-heading">{t('featuredCollectors')}</h2>
             <Row>
               {collectors.map(collector => (
-                <Col key={collector._id} md={12} className="mb-3">
+                <Col key={collector._id || collector.id} md={12} className="mb-3">
                   <FadeInOnScroll>
                     <Card className="h-100 collector-card">
                       <Row>

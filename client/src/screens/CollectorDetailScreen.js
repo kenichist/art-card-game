@@ -5,9 +5,11 @@ import { Container, Row, Col, Card, ListGroup, Button } from 'react-bootstrap';
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { getCollectorById } from '../services/fileSystemService';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const CollectorDetailScreen = () => {
   const { t } = useTranslation();
+  const { language } = useLanguage();
   const [collector, setCollector] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -17,7 +19,8 @@ const CollectorDetailScreen = () => {
     const fetchCollector = async () => {
       try {
         setLoading(true);
-        const data = await getCollectorById(id);
+        // Pass the current language to get language-specific images
+        const data = await getCollectorById(id, language);
         setCollector(data);
         setLoading(false);
       } catch (error) {
@@ -26,7 +29,7 @@ const CollectorDetailScreen = () => {
       }
     };
     fetchCollector();
-  }, [id]);
+  }, [id, language]); // Re-fetch when language or id changes
 
   // Helper function to get collector type from image filename
   const getCollectorType = (imageUrl) => {

@@ -3,7 +3,10 @@ const { getCollectors, getCollectorById } = require('../services/fileSystemServi
 // Get all collectors
 const getAllCollectors = async (req, res) => {
   try {
-    const collectors = getCollectors().map(collector => {
+    // Get language from query parameter, defaulting to 'en'
+    const language = req.query.lang || 'en';
+    
+    const collectors = getCollectors(language).map(collector => {
       // Add descriptions arrays to maintain compatibility with frontend
       return {
         ...collector,
@@ -21,7 +24,10 @@ const getAllCollectors = async (req, res) => {
 const getCollectorByIdHandler = async (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    const collector = getCollectorById(id);
+    // Get language from query parameter, defaulting to 'en'
+    const language = req.query.lang || 'en';
+    
+    const collector = getCollectorById(id, language);
     
     if (collector) {
       // Add descriptions array to maintain compatibility with frontend

@@ -3,11 +3,13 @@
 
 /**
  * Get all collectors from the filesystem
+ * @param {String} lang Language code ('en' or 'zh')
  * @returns {Promise<Array>} Promise resolving to array of collector objects
  */
-export const getCollectors = async () => {
+export const getCollectors = async (lang = null) => {
   try {
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/api/collectors`);
+    const langParam = lang ? `?lang=${lang}` : '';
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/api/collectors${langParam}`);
     if (!response.ok) {
       throw new Error('Failed to fetch collectors');
     }
@@ -22,11 +24,13 @@ export const getCollectors = async () => {
 /**
  * Get collector by ID
  * @param {Number} id Collector ID
+ * @param {String} lang Language code ('en' or 'zh')
  * @returns {Promise<Object>} Promise resolving to collector object
  */
-export const getCollectorById = async (id) => {
+export const getCollectorById = async (id, lang = null) => {
   try {
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/api/collectors/${id}`);
+    const langParam = lang ? `?lang=${lang}` : '';
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/api/collectors/${id}${langParam}`);
     if (!response.ok) {
       throw new Error('Failed to fetch collector');
     }
@@ -40,11 +44,13 @@ export const getCollectorById = async (id) => {
 
 /**
  * Get all items from the filesystem
+ * @param {String} lang Language code ('en' or 'zh')
  * @returns {Promise<Array>} Promise resolving to array of item objects
  */
-export const getItems = async () => {
+export const getItems = async (lang = null) => {
   try {
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/api/items`);
+    const langParam = lang ? `?lang=${lang}` : '';
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/api/items${langParam}`);
     if (!response.ok) {
       throw new Error('Failed to fetch items');
     }
@@ -59,11 +65,13 @@ export const getItems = async () => {
 /**
  * Get item by ID
  * @param {Number} id Item ID
+ * @param {String} lang Language code ('en' or 'zh')
  * @returns {Promise<Object>} Promise resolving to item object
  */
-export const getItemById = async (id) => {
+export const getItemById = async (id, lang = null) => {
   try {
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/api/items/${id}`);
+    const langParam = lang ? `?lang=${lang}` : '';
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/api/items/${id}${langParam}`);
     if (!response.ok) {
       throw new Error('Failed to fetch item');
     }
@@ -79,12 +87,14 @@ export const getItemById = async (id) => {
  * Match item with collector
  * @param {Number} itemId Item ID
  * @param {Number} collectorId Collector ID
+ * @param {String} lang Language code ('en' or 'zh')
  * @returns {Promise<Object>} Promise resolving to match result
  */
-export const matchItemWithCollector = async (itemId, collectorId) => {
+export const matchItemWithCollector = async (itemId, collectorId, lang = null) => {
   try {
+    const langParam = lang ? `?lang=${lang}` : '';
     const response = await fetch(
-      `${process.env.REACT_APP_API_URL}/api/auctions/match/${itemId}/${collectorId}`, 
+      `${process.env.REACT_APP_API_URL}/api/auctions/match/${itemId}/${collectorId}${langParam}`, 
       { method: 'POST' }
     );
     if (!response.ok) {
@@ -100,11 +110,13 @@ export const matchItemWithCollector = async (itemId, collectorId) => {
 
 /**
  * Get active auction
+ * @param {String} lang Language code ('en' or 'zh')
  * @returns {Promise<Object>} Promise resolving to active auction
  */
-export const getActiveAuction = async () => {
+export const getActiveAuction = async (lang = null) => {
   try {
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auctions/active`);
+    const langParam = lang ? `?lang=${lang}` : '';
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auctions/active${langParam}`);
     if (!response.ok) {
       throw new Error('Failed to fetch active auction');
     }
@@ -120,12 +132,14 @@ export const getActiveAuction = async () => {
  * Update auction
  * @param {String} auctionId Auction ID
  * @param {Object} auctionData Auction data
+ * @param {String} lang Language code ('en' or 'zh')
  * @returns {Promise<Object>} Promise resolving to updated auction
  */
-export const updateAuction = async (auctionId, auctionData) => {
+export const updateAuction = async (auctionId, auctionData, lang = null) => {
   try {
+    const langParam = lang ? `?lang=${lang}` : '';
     const response = await fetch(
-      `${process.env.REACT_APP_API_URL}/api/auctions/${auctionId}`,
+      `${process.env.REACT_APP_API_URL}/api/auctions/${auctionId}${langParam}`,
       {
         method: 'PUT',
         headers: {

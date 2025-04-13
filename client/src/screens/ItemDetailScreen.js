@@ -5,9 +5,11 @@ import { Container, Row, Col, Card, ListGroup, Button } from 'react-bootstrap';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { getItemById } from '../services/fileSystemService';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const ItemDetailScreen = () => {
   const { t } = useTranslation();
+  const { language } = useLanguage();
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -18,7 +20,8 @@ const ItemDetailScreen = () => {
     const fetchItem = async () => {
       try {
         setLoading(true);
-        const data = await getItemById(id);
+        // Pass the current language to get language-specific images
+        const data = await getItemById(id, language);
         setItem(data);
         setLoading(false);
       } catch (error) {
@@ -27,7 +30,7 @@ const ItemDetailScreen = () => {
       }
     };
     fetchItem();
-  }, [id]);
+  }, [id, language]); // Re-fetch when language or id changes
 
   const handleUseInAuction = () => {
     // Create an auction with this item

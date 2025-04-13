@@ -1,13 +1,11 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dropdown } from 'react-bootstrap';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const LanguageSwitcher = () => {
   const { i18n } = useTranslation();
-
-  const changeLanguage = (lng) => {
-    i18n.changeLanguage(lng);
-  };
+  const { changeLanguage } = useLanguage();
 
   // Define language names for the dropdown
   const languages = {

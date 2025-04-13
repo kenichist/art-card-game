@@ -2,7 +2,7 @@
 
 const express = require('express');
 const router = express.Router();
-const itemController = require('../controllers/itemController'); // Assuming controller path is correct
+const itemController = require('../controllers/itemController'); 
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs'); // Import fs for directory creation
@@ -10,8 +10,11 @@ const fs = require('fs'); // Import fs for directory creation
 // Configure storage for uploaded item images
 const storage = multer.diskStorage({
   destination: function(req, file, cb) {
+    // Get language from query params, default to 'en'
+    const lang = req.query.lang || 'en';
+    
     // Path relative from server/routes -> server -> game research -> client/public/images
-    const uploadDir = path.join(__dirname, '..', '..', 'client', 'public', 'images');
+    const uploadDir = path.join(__dirname, '..', '..', 'client', 'public', 'images', 'items', lang);
     // Ensure the directory exists
     try {
       fs.mkdirSync(uploadDir, { recursive: true });

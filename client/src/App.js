@@ -11,13 +11,13 @@ import CollectorsScreen from './screens/CollectorsScreen';
 import CollectorDetailScreen from './screens/CollectorDetailScreen';
 import AuctionScreen from './screens/AuctionScreen';
 import UploadScreen from './screens/UploadScreen';
-// GalleryScreen import removed
+import { LanguageProvider } from './contexts/LanguageContext';
 
 const App = () => {
   const location = useLocation();
 
   return (
-    <>
+    <LanguageProvider>
       <Header />
       <main className="py-3">
         <Container>
@@ -30,13 +30,12 @@ const App = () => {
               <Route path="/collectors/:id" element={<CollectorDetailScreen />} />
               <Route path="/auction" element={<AuctionScreen />} />
               <Route path="/upload" element={<UploadScreen />} />
-              {/* Gallery routes removed */}
             </Routes>
           </PageTransition>
         </Container>
       </main>
       <Footer />
-    </>
+    </LanguageProvider>
   );
 };
 

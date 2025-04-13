@@ -5,6 +5,7 @@ import { Container, Row, Col, Card, Button, Form, Alert, ListGroup, Modal } from
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import FadeInOnScroll from '../components/FadeInOnScroll';
+import { useLanguage } from '../contexts/LanguageContext';
 import { 
   getActiveAuction, 
   getItemById, 
@@ -15,6 +16,7 @@ import {
 
 const AuctionScreen = () => {
   const { t } = useTranslation();
+  const { language } = useLanguage();
   const location = useLocation();
   const matchSoundRef = useRef(null);
   const successSoundRef = useRef(null);
@@ -52,18 +54,18 @@ const AuctionScreen = () => {
       try {
         setLoading(true);
         
-        // Fetch active auction
-        const auctionData = await getActiveAuction();
+        // Fetch active auction with current language
+        const auctionData = await getActiveAuction(language);
         setActiveAuction(auctionData);
         
-        // If there's an active auction, fetch its item details
+        // If there's an active auction, fetch its item details with language
         if (auctionData) {
-          const itemData = await getItemById(auctionData.itemId);
+          const itemData = await getItemById(auctionData.itemId, language);
           setCurrentItem(itemData);
         }
         
-        // Fetch user's collections
-        const collectionsData = await getCollectors();
+        // Fetch user's collections with language
+        const collectionsData = await getCollectors(language);
         setUserCollections(collectionsData);
         
         setLoading(false);
@@ -73,7 +75,7 @@ const AuctionScreen = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [language]); // Re-fetch when language changes
 
   const createParticles = () => {
     const container = particleContainerRef.current;
@@ -125,8 +127,8 @@ const AuctionScreen = () => {
         return;
       }
 
-      // Get the match calculation
-      const matchData = await matchItemWithCollector(currentItem.id, collectorId);
+      // Pass the language parameter to the match function
+      const matchData = await matchItemWithCollector(currentItem.id, collectorId, language);
       console.log('Match data received:', matchData); // Debugging the response
       setMatchResults(matchData);
       setShowMatchModal(true);
@@ -169,11 +171,12 @@ const AuctionScreen = () => {
 
   const refreshAuctionData = async () => {
     try {
-      const auctionData = await getActiveAuction();
+      // Use language when refreshing auction data
+      const auctionData = await getActiveAuction(language);
       setActiveAuction(auctionData);
       
       if (auctionData) {
-        const itemData = await getItemById(auctionData.itemId);
+        const itemData = await getItemById(auctionData.itemId, language);
         setCurrentItem(itemData);
       } else {
         setCurrentItem(null);

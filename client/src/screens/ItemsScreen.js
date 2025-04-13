@@ -8,9 +8,11 @@ import FadeInOnScroll from '../components/FadeInOnScroll';
 import { getItems } from '../services/fileSystemService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const ItemsScreen = () => {
   const { t } = useTranslation();
+  const { language } = useLanguage();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -23,7 +25,8 @@ const ItemsScreen = () => {
     const fetchItems = async () => {
       try {
         setLoading(true);
-        const data = await getItems();
+        // Pass the current language to get language-specific images
+        const data = await getItems(language);
         // Sort items by ID
         const sortedData = [...data].sort((a, b) => Number(a.id) - Number(b.id));
         setItems(sortedData);
@@ -34,7 +37,7 @@ const ItemsScreen = () => {
       }
     };
     fetchItems();
-  }, []);
+  }, [language]); // Re-fetch when language changes
 
   // Filter items based on search term
   const filteredItems = items.filter(item => 
