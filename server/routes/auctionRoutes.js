@@ -10,5 +10,6 @@ router.post('/', auctionController.createAuction);
 router.put('/:id', auctionController.updateAuction);
 router.delete('/:id', auctionController.deleteAuction);
 router.post('/match/:itemId/:collectorId', auctionController.matchItemWithCollector);
+router.post('/match', auctionController.matchItems); // New route for matching multiple items
 
 module.exports = router;

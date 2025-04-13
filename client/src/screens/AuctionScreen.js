@@ -1,382 +1,322 @@
 // --- START OF FILE AuctionScreen.js ---
 
-import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Button, Alert, ListGroup } from 'react-bootstrap';
-// Import useLocation
+import React, { useState, useEffect, useRef } from 'react';
+import { Container, Row, Col, Card, Button, Form, Alert, ListGroup, Modal } from 'react-bootstrap';
 import { useLocation } from 'react-router-dom';
-import axios from 'axios';
 import { useTranslation } from 'react-i18next';
+import FadeInOnScroll from '../components/FadeInOnScroll';
+import { 
+  getActiveAuction, 
+  getItemById, 
+  getCollectors, 
+  matchItemWithCollector,
+  updateAuction
+} from '../services/fileSystemService';
 
 const AuctionScreen = () => {
   const { t } = useTranslation();
-  // Get location object to access state passed during navigation
   const location = useLocation();
-  const requestedItemIdFromState = location.state?.requestedItemId; // Get the ID passed from ItemDetailScreen
+  const matchSoundRef = useRef(null);
+  const successSoundRef = useRef(null);
+  const particleContainerRef = useRef(null);
 
-  const [activeItem, setActiveItem] = useState(null);
-  const [collectors, setCollectors] = useState([]);
-  const [selectedCollector, setSelectedCollector] = useState(null);
-  const [matchResult, setMatchResult] = useState(null);
+  const [activeAuction, setActiveAuction] = useState(null);
+  const [currentItem, setCurrentItem] = useState(null);
+  const [userCollections, setUserCollections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [matchResults, setMatchResults] = useState(null);
+  const [showMatchModal, setShowMatchModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   useEffect(() => {
-    // Clear state passed via navigation after reading it once (optional)
-    // window.history.replaceState({}, document.title);
+    // Create audio elements
+    matchSoundRef.current = new Audio('/sounds/match.mp3');
+    successSoundRef.current = new Audio('/sounds/success.mp3');
+    matchSoundRef.current.volume = 0.5;
+    successSoundRef.current.volume = 0.5;
 
-    const fetchActiveAuction = async () => {
-      let currentAuctionItemId = null; // The ID of the item in the globally active auction (if any)
-      let itemToActivate = null; // The item object we intend to make active
+    return () => {
+      // Cleanup audio elements
+      if (matchSoundRef.current) {
+        matchSoundRef.current = null;
+      }
+      if (successSoundRef.current) {
+        successSoundRef.current = null;
+      }
+    };
+  }, []);
 
+  useEffect(() => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        setError(null);
-
-        // 1. Check if there's already an active auction globally
-        try {
-          const { data: activeAuction } = await axios.get(`${process.env.REACT_APP_API_URL}/api/auctions/active`);
-          currentAuctionItemId = activeAuction?.itemId;
-          console.log(`Found active auction for item ID: ${currentAuctionItemId}`);
-        } catch (fetchError) {
-          if (fetchError.response?.status !== 404) {
-            // If error is something other than 'Not Found', throw it
-            throw fetchError;
-          }
-          // 404 means no active auction, proceed to potentially start one
-          console.log("No active auction found.");
+        
+        // Fetch active auction
+        const auctionData = await getActiveAuction();
+        setActiveAuction(auctionData);
+        
+        // If there's an active auction, fetch its item details
+        if (auctionData) {
+          const itemData = await getItemById(auctionData.itemId);
+          setCurrentItem(itemData);
         }
-
-        // 2. Determine which item to load
-        if (currentAuctionItemId) {
-          // Load the item from the existing active auction
-          const itemRes = await axios.get(`${process.env.REACT_APP_API_URL}/api/items/${currentAuctionItemId}`);
-          itemToActivate = itemRes.data;
-        } else {
-          // No active auction exists - check if a specific item was requested via navigation state
-          if (requestedItemIdFromState) {
-            console.log(`Attempting to start auction with requested item ID: ${requestedItemIdFromState}`);
-            try {
-              // Fetch the specific requested item
-              const itemRes = await axios.get(`${process.env.REACT_APP_API_URL}/api/items/${requestedItemIdFromState}`);
-              itemToActivate = itemRes.data;
-              // Create a new auction record for this specific item
-              await axios.post(`${process.env.REACT_APP_API_URL}/api/auctions`, {
-                  itemId: itemToActivate.id,
-                  status: 'active'
-              });
-               console.log(`Started new auction specifically for item ${itemToActivate.id}`);
-            } catch (requestedItemError) {
-                 console.error(`Failed to fetch requested item ${requestedItemIdFromState}:`, requestedItemError);
-                 setError(t('errorFetchingRequestedItem', { id: requestedItemIdFromState }));
-                 // Fallback to random item if requested one fails? Or just show error? For now, show error.
-                 // Setting itemToActivate to null will prevent auction from starting below if error occurred
-                 itemToActivate = null;
-            }
-          } else {
-            // No active auction AND no specific item requested - pick a random one
-            console.log("No requested item ID found, selecting a random item.");
-            const itemsRes = await axios.get(`${process.env.REACT_APP_API_URL}/api/items`);
-            if (itemsRes.data.length > 0) {
-              const availableItems = itemsRes.data; // TODO: Filter completed?
-              if (availableItems.length > 0) {
-                  const randomItem = availableItems[Math.floor(Math.random() * availableItems.length)];
-                  itemToActivate = randomItem;
-                  // Create a new auction record for this random item
-                  await axios.post(`${process.env.REACT_APP_API_URL}/api/auctions`, {
-                      itemId: itemToActivate.id,
-                      status: 'active'
-                  });
-                  console.log(`Started new auction randomly for item ${itemToActivate.id}`);
-              } else {
-                   setError(t('noAvailableItems'));
-              }
-            } else {
-               setError(t('noItemsFound'));
-            }
-          }
-        }
-
-        // 3. Set the active item state if one was successfully determined
-        if (itemToActivate) {
-             setActiveItem(itemToActivate);
-        } else if (!error) {
-            // If no item was activated and no error was explicitly set, set a generic error.
-            // This might happen if fetching the requested item failed without setting error above.
-             setError(t('errorNoItemActivated'));
-        }
-
-
-        // 4. Fetch collectors (always needed if an item was potentially activated)
-        // Only fetch collectors if we expect to display the auction screen
-        if (itemToActivate || currentAuctionItemId) {
-            const collectorsRes = await axios.get(`${process.env.REACT_APP_API_URL}/api/collectors`);
-            setCollectors(collectorsRes.data);
-        }
-
-      } catch (err) { // Catch errors from getting active auction or other unexpected issues
-        console.error("Error during auction setup:", err);
-        setError(err.response?.data?.message || err.message || t('errorAuctionSetup'));
-        setActiveItem(null); // Ensure no item is shown if setup failed
-      } finally {
+        
+        // Fetch user's collections
+        const collectionsData = await getCollectors();
+        setUserCollections(collectionsData);
+        
+        setLoading(false);
+      } catch (error) {
+        setError(error.message);
         setLoading(false);
       }
     };
+    fetchData();
+  }, []);
 
-    fetchActiveAuction();
-     // Add requestedItemIdFromState to dependency array? No, because we only want to read it ONCE on mount.
-     // The effect should run based on component mount, not location state changes after mount.
-     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Run only once on mount
+  const createParticles = () => {
+    const container = particleContainerRef.current;
+    if (!container) return;
 
-  // ... (rest of the component: selectCollector, handleMatch, handleNextItem, JSX) ...
-  // The handleNextItem logic should remain largely the same - it completes the *current*
-  // auction and starts a new *random* one, it doesn't care how the completed one started.
-
-  // --- NO CHANGES NEEDED BELOW THIS LINE FOR THIS SPECIFIC FIX ---
-
-  const selectCollector = (collector) => {
-    setSelectedCollector(collector);
-    setMatchResult(null); // Reset match result when selecting a new collector
-  };
-
-  const handleMatch = async () => {
-    if (!activeItem || !selectedCollector) return;
-    try {
-      setLoading(true); // Set loading state specifically for match operation
-      setError(null);
-      setMatchResult(null); // Clear previous results
-
-      const { data } = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/auctions/match/${activeItem.id}/${selectedCollector.id}`
-      );
-      setMatchResult(data);
-    } catch (err) {
-      console.error("Error matching item:", err);
-      setError(err.response?.data?.message || err.message || t('errorMatching'));
-    } finally {
-      setLoading(false); // Clear loading state for match operation
+    for (let i = 0; i < 50; i++) {
+      const particle = document.createElement('div');
+      particle.className = 'success-particle';
+      
+      // Random position and animation
+      const angle = Math.random() * Math.PI * 2;
+      const velocity = 2 + Math.random() * 2;
+      const size = 5 + Math.random() * 5;
+      
+      particle.style.width = `${size}px`;
+      particle.style.height = `${size}px`;
+      
+      // Set initial position to center
+      particle.style.left = '50%';
+      particle.style.top = '50%';
+      
+      // Animate using CSS transforms
+      const distance = 50 + Math.random() * 50;
+      const duration = 0.5 + Math.random() * 0.5;
+      
+      particle.style.transform = `translate(-50%, -50%)`;
+      particle.style.animation = `particle ${duration}s ease-out forwards`;
+      
+      // Calculate end position
+      const endX = Math.cos(angle) * distance;
+      const endY = Math.sin(angle) * distance;
+      
+      particle.style.setProperty('--end-x', `${endX}px`);
+      particle.style.setProperty('--end-y', `${endY}px`);
+      
+      container.appendChild(particle);
+      
+      // Remove particle after animation
+      setTimeout(() => {
+        container.removeChild(particle);
+      }, duration * 1000);
     }
   };
 
-   const handleNextItem = async () => {
-    setLoading(true);
-    setError(null);
-    const currentActiveItemId = activeItem?.id; // Store ID before clearing state
-    setActiveItem(null);
-    setSelectedCollector(null);
-    setMatchResult(null);
-
+  const handleBid = async (collectorId) => {
     try {
-      // Attempt to find and complete the current active auction (using the ID we just had)
-      let activeAuctionId = null;
-      if(currentActiveItemId) { // Only search if we had an active item
-          try {
-              // Find the auction based on the itemId being active
-              const activeAuctionRes = await axios.get(`${process.env.REACT_APP_API_URL}/api/auctions/active`);
-              // Double check if the found active auction matches the item we just completed
-              if (activeAuctionRes.data?.itemId === currentActiveItemId) {
-                 activeAuctionId = activeAuctionRes.data?._id; // Use MongoDB _id
-              } else {
-                  console.warn("Found active auction, but its item ID doesn't match the one just displayed.");
-              }
-          } catch (findError) {
-              if (findError.response?.status !== 404) {
-                  throw findError; // Re-throw if it's not a 'not found' error
-              }
-               console.log("No active auction found to complete, proceeding to next item.");
-          }
+      if (!activeAuction || !currentItem) {
+        setError('No active auction found');
+        return;
       }
 
-
-      if (activeAuctionId) {
-          // Mark auction as completed using its MongoDB _id
-          await axios.put(`${process.env.REACT_APP_API_URL}/api/auctions/${activeAuctionId}`, {
-              status: 'completed',
-              winnerCollectorId: matchResult?.matchedDescriptions.length > 0 ? selectedCollector?.id : null, // Optional: record winner if match was successful
-              finalValue: matchResult?.totalValue // Optional: record final value
-          });
-          console.log(`Auction ${activeAuctionId} completed.`);
-      } else {
-          console.log("Could not find a matching active auction to complete.");
-      }
-
-      // Get items and filter out completed ones (more robust approach)
-      const [itemsRes, auctionsRes] = await Promise.all([
-          axios.get(`${process.env.REACT_APP_API_URL}/api/items`),
-          axios.get(`${process.env.REACT_APP_API_URL}/api/auctions?status=completed`) // Fetch completed auctions
-      ]);
-
-      const allItems = itemsRes.data;
-      const completedItemIds = new Set(auctionsRes.data.map(auc => auc.itemId));
-
-      const availableItems = allItems.filter(item => !completedItemIds.has(item.id));
-
-      if (availableItems.length > 0) {
-        const randomItem = availableItems[Math.floor(Math.random() * availableItems.length)];
-        setActiveItem(randomItem);
-
-        // Create a new auction with this item
-        await axios.post(`${process.env.REACT_APP_API_URL}/api/auctions`, {
-          itemId: randomItem.id,
-          status: 'active'
-        });
-        console.log(`Started new auction for item ${randomItem.id}`);
-
-      } else {
-         setError(t('noMoreItems'));
-         console.log("No items left to start a new auction.");
-      }
-
-    } catch (err) {
-      console.error("Error handling next item:", err);
-      setError(err.response?.data?.message || err.message || t('errorNextItem'));
-    } finally {
-      setLoading(false);
+      // Get the match calculation
+      const matchData = await matchItemWithCollector(currentItem.id, collectorId);
+      console.log('Match data received:', matchData); // Debugging the response
+      setMatchResults(matchData);
+      setShowMatchModal(true);
+      matchSoundRef.current?.play().catch(console.error);
+    } catch (error) {
+      setError(error.message);
     }
   };
 
+  const handleConfirmBid = async () => {
+    try {
+      if (!activeAuction || !activeAuction._id) {
+        setError('No active auction found');
+        return;
+      }
 
-  if (loading && !activeItem) return <h2>{t('loading')}</h2>;
-  if (error && !activeItem && !loading) return <h3>{t('error', { message: error })}</h3>;
+      // Update the auction with the match results
+      await updateAuction(activeAuction._id, {
+        collectorId: matchResults.auction.collectorId,
+        matchedDescriptions: matchResults.matchedDescriptions,
+        totalValue: matchResults.totalValue,
+        status: 'completed'
+      });
 
-  // --- JSX REMAINS THE SAME ---
-   return (
+      setShowMatchModal(false);
+      setShowSuccessModal(true);
+      successSoundRef.current?.play().catch(console.error);
+      createParticles();
+
+      // Auto-hide success modal after 2 seconds
+      setTimeout(() => {
+        setShowSuccessModal(false);
+        // Then refresh the auction data
+        refreshAuctionData();
+      }, 2000);
+    } catch (error) {
+      setError(error.message);
+    }
+  };
+
+  const refreshAuctionData = async () => {
+    try {
+      const auctionData = await getActiveAuction();
+      setActiveAuction(auctionData);
+      
+      if (auctionData) {
+        const itemData = await getItemById(auctionData.itemId);
+        setCurrentItem(itemData);
+      } else {
+        setCurrentItem(null);
+      }
+      
+      setMatchResults(null);
+    } catch (error) {
+      setError(error.message);
+    }
+  };
+
+  if (loading) return <h2>{t('loading')}</h2>;
+  if (error) return <h3>{t('error', { message: error })}</h3>;
+
+  return (
     <Container>
-      <h1 className="my-4">{t('auctionRoom')}</h1>
+      <FadeInOnScroll>
+        <h1 className="page-heading my-4">{t('auctionTitle')}</h1>
+      </FadeInOnScroll>
 
-      {error && activeItem && <Alert variant="danger">{t('error', { message: error })}</Alert>}
-
-      {activeItem ? (
-        <Row className="mb-4">
-          <Col md={12}>
-            <h2>{t('currentItem')}</h2>
-            <Card>
-            <Row className="g-0"> {/* Use g-0 class for no gutters (Bootstrap 5) */}
-                <Col md={4} className="d-flex align-items-center justify-content-center p-2">
-                  <img
-                    src={activeItem.image}
-                    alt={activeItem.name}
-                    className="img-fluid"
-                    style={{ maxHeight: '300px', objectFit: 'contain' }}
-                  />
-                </Col>
-                <Col md={8}>
-                  <Card.Body>
-                    <Card.Title>{activeItem.name}</Card.Title>
-                    <h4>{t('descriptions')}</h4>
-                    {activeItem.descriptions.length > 0 ? (
-                         <ListGroup variant="flush">
-                         {activeItem.descriptions.map((desc, index) => (
-                           <ListGroup.Item key={index} className="px-0 py-1">
-                             {desc.attribute}
-                           </ListGroup.Item>
-                         ))}
-                       </ListGroup>
-                    ) : (
-                        <p>{t('noDescriptions')}</p>
-                    )}
-                  </Card.Body>
-                </Col>
-              </Row>
-            </Card>
+      {currentItem ? (
+        <Row className="mb-5">
+          <Col md={6}>
+            <FadeInOnScroll>
+              <Card className="current-item">
+                <Card.Header as="h5">{t('currentAuctionItem')}</Card.Header>
+                <Card.Img
+                  variant="top"
+                  src={currentItem.image}
+                  alt={currentItem.name}
+                  style={{ height: '300px', objectFit: 'contain' }}
+                />
+                <Card.Body>
+                  <Card.Title>{currentItem.name}</Card.Title>
+                  {currentItem.descriptions && (
+                    <ListGroup variant="flush">
+                      {currentItem.descriptions.map((desc, index) => (
+                        <ListGroup.Item key={index}>
+                          <strong>{desc.attribute}:</strong> {desc.value}
+                        </ListGroup.Item>
+                      ))}
+                    </ListGroup>
+                  )}
+                </Card.Body>
+              </Card>
+            </FadeInOnScroll>
           </Col>
         </Row>
       ) : (
-         loading ? <p>{t('loadingNextItem') || 'Loading next item...'}</p> :
-         !error && <p>{t('noMoreItems') || 'No more items available.'}</p>
+        <Alert variant="info">{t('noActiveAuction')}</Alert>
       )}
 
-      {activeItem && (
-        <Row className="mb-4">
-          <Col md={12}>
-            <h2>{t('selectCollectorCard')}</h2>
-            <Row>
-              {collectors.map(collector => (
-                <Col key={collector._id || collector.id} md={4} lg={3} className="mb-3 d-flex">
-                  <Card
-                    onClick={() => selectCollector(collector)}
-                    className={`h-100 ${selectedCollector?.id === collector.id ? 'border-primary border-2' : ''}`}
-                    style={{ cursor: 'pointer' }}
+      <FadeInOnScroll>
+        <h2 className="mb-4">{t('yourCollections')}</h2>
+      </FadeInOnScroll>
+
+      <Row>
+        {userCollections.map(collector => (
+          <Col key={collector._id} sm={12} md={6} lg={4} className="mb-4">
+            <FadeInOnScroll>
+              <Card className="h-100">
+                <Card.Img
+                  variant="top"
+                  src={collector.image}
+                  alt={collector.name}
+                  style={{ height: '200px', objectFit: 'contain' }}
+                />
+                <Card.Body>
+                  <Card.Title>{collector.name}</Card.Title>
+                  {collector.descriptions && (
+                    <ListGroup variant="flush">
+                      {collector.descriptions.map((desc, index) => (
+                        <ListGroup.Item key={index}>
+                          <strong>{desc.attribute}:</strong> {desc.value}
+                        </ListGroup.Item>
+                      ))}
+                    </ListGroup>
+                  )}
+                  <Button
+                    variant="primary"
+                    className="mt-3"
+                    onClick={() => handleBid(collector.id)}
+                    disabled={!currentItem}
                   >
-                    <Card.Img
-                      variant="top"
-                      src={collector.image}
-                      alt={collector.name}
-                      className="p-2"
-                      style={{ height: '180px', objectFit: 'contain' }}
-                    />
-                    <Card.Body className="d-flex flex-column">
-                      <Card.Title>{collector.name}</Card.Title>
-                      <h5 className="mt-2">{t('descriptions')}</h5>
-                      {collector.descriptions.length > 0 ? (
-                        <ListGroup variant="flush" className="flex-grow-1">
-                          {collector.descriptions.map((desc, index) => (
-                             <ListGroup.Item key={index} className="px-0 py-1">
-                                {desc.attribute}: <span className="desc-value">{desc.value}{t('valueSuffix') || ''}</span>
-                             </ListGroup.Item>
-                          ))}
-                       </ListGroup>
-                      ) : (
-                           <p className="flex-grow-1">{t('noDescriptions')}</p>
-                      )}
-                    </Card.Body>
-                  </Card>
-                </Col>
-              ))}
-            </Row>
+                    {t('placeBid')}
+                  </Button>
+                </Card.Body>
+              </Card>
+            </FadeInOnScroll>
           </Col>
-        </Row>
-      )}
+        ))}
+      </Row>
 
-
-      {activeItem && (
-        <Row className="mb-4">
-          <Col className="text-center">
-            <Button
-              variant="primary"
-              size="lg"
-              onClick={handleMatch}
-              disabled={!selectedCollector || !activeItem || loading}
-            >
-              {loading && matchResult === null ? t('loading') : t('matchItemCollector')}
-            </Button>
-          </Col>
-        </Row>
-      )}
-
-
-      {matchResult && (
-        <Row className="mb-4">
-          <Col md={12}>
-            <Card bg="light">
-              <Card.Body>
-                <Card.Title>{t('matchResults')}</Card.Title>
-                <h4>{t('matchedDescriptions')}</h4>
-                {matchResult.matchedDescriptions.length > 0 ? (
-                  <ListGroup variant="flush">
-                    {matchResult.matchedDescriptions.map((desc, index) => (
-                       <ListGroup.Item key={index} className="bg-light">
-                        {desc.attribute}: <span className="desc-value">{desc.value}{t('valueSuffix') || ''}</span>
-                      </ListGroup.Item>
-                    ))}
-                  </ListGroup>
+      <Modal show={showMatchModal} onHide={() => setShowMatchModal(false)} className="match-modal" aria-labelledby="match-modal-title">
+        <Modal.Header closeButton>
+          <Modal.Title id="match-modal-title" style={{ color: '#ffd700' }}>{t('matchResults')}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {matchResults && (
+            <>
+              <h5 className="matched-title">{t('matchedDescriptions')}:</h5>
+              <ListGroup className="mb-3 matched-list">
+                {matchResults.matchedDescriptions && matchResults.matchedDescriptions.length > 0 ? (
+                  matchResults.matchedDescriptions.map((desc, index) => (
+                    <ListGroup.Item key={index} className="matched-item">
+                      <strong>• {desc.attribute}</strong>
+                    </ListGroup.Item>
+                  ))
                 ) : (
-                  <p>{t('noMatch')}</p>
+                  <ListGroup.Item className="matched-item">
+                    <strong>{t('noMatch')}</strong>
+                  </ListGroup.Item>
                 )}
-                <h3 className="mt-3">{t('totalValue', { value: matchResult.totalValue })}</h3>
-                <Button
-                  variant="success"
-                  onClick={handleNextItem}
-                  className="mt-3"
-                  disabled={loading}
-                >
-                  {loading && activeItem === null ? t('loading') : t('nextItem')}
-                </Button>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
-      )}
+              </ListGroup>
+              <h5 className="total-value">{t('totalValue', { value: matchResults.totalValue })}</h5>
+            </>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowMatchModal(false)}>
+            {t('cancel')}
+          </Button>
+          <Button variant="primary" onClick={handleConfirmBid} className="confirm-bid-btn">
+            {t('confirmBid')}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal 
+        show={showSuccessModal} 
+        centered
+        className="success-modal"
+        aria-labelledby="success-modal-title"
+      >
+        <Modal.Body className="text-center py-5">
+          <div ref={particleContainerRef} className="particle-container" />
+          <div className="success-animation">
+            <i className="fas fa-check-circle" aria-hidden="true"></i>
+          </div>
+          <h4 id="success-modal-title">{t('bidSuccessful')}</h4>
+        </Modal.Body>
+      </Modal>
+
     </Container>
   );
 };

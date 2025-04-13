@@ -10,8 +10,12 @@ body {
   background-color: #1a1a1a;
   color: #ffffff;
   background-image: 
-    linear-gradient(rgba(26, 26, 26, 0.97), rgba(26, 26, 26, 0.97)),
-    url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23332b20' fill-opacity='0.4'%3E%3Cpath d='M0 0h20v20H0z'/%3E%3C/g%3E%3C/svg%3E");
+    linear-gradient(rgba(26, 26, 26, 0.92), rgba(26, 26, 26, 0.92)),
+    url("https://img.freepik.com/free-photo/fantasy-abandoned-castle-sunset-digital-painting_456031-162.jpg");
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: center;
+  min-height: 100vh;
 }
 
 code {
@@ -21,19 +25,21 @@ code {
 
 /* Custom styles for the auction-collector app */
 .card {
-  transition: transform 0.3s, box-shadow 0.3s;
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
   margin-bottom: 1.5rem;
-  background: linear-gradient(135deg, #2a2522 0%, #1a1614 100%);
+  background: linear-gradient(135deg, rgba(42, 37, 34, 0.95) 0%, rgba(26, 22, 20, 0.95) 100%);
   border: 1px solid #463931;
   border-radius: 8px;
   overflow: hidden;
   position: relative;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transform-origin: center;
+  will-change: transform;
 }
 
 .card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
 }
 
 /* Fix for button clickability */
@@ -221,6 +227,8 @@ code {
 .hero-content {
   text-align: center;
   padding: 3rem 0;
+  position: relative;
+  z-index: 1; /* Lower z-index to prevent interference */
 }
 
 .hero-content h1 {
@@ -254,6 +262,7 @@ code {
 
 .container {
   position: relative;
+  z-index: 1;
 }
 
 .container::before {
@@ -266,6 +275,18 @@ code {
   background: radial-gradient(circle at 50% 50%, rgba(139, 69, 19, 0.1), transparent 70%);
   pointer-events: none;
   z-index: 1;
+}
+
+.container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 50% 0%, rgba(139, 69, 19, 0.1), transparent 70%);
+  pointer-events: none;
+  z-index: -1;
 }
 
 .card-text {
@@ -561,3 +582,366 @@ h2.my-4 {
     font-size: 1.25rem;
   }
 }
+
+/* Enhanced card animations */
+.fade-in-up {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Glowing effect for important elements */
+.hero-content h1,
+.page-heading,
+.card-title {
+  position: relative;
+}
+
+.hero-content h1::after,
+.page-heading::after,
+.card-title::after {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  right: -5px;
+  bottom: -5px;
+  background: radial-gradient(circle at center, rgba(255, 215, 0, 0.15), transparent 70%);
+  filter: blur(8px);
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.hero-content h1:hover::after,
+.page-heading:hover::after,
+.card-title:hover::after {
+  opacity: 1;
+}
+
+/* Interactive button animations */
+.btn {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(circle, rgba(255, 215, 0, 0.2) 0%, transparent 70%);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s ease, height 0.6s ease;
+}
+
+.btn:hover::before {
+  width: 200%;
+  height: 200%;
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Match Modal Styling */
+.match-modal .modal-content {
+  background: linear-gradient(135deg, #2a2522 0%, #1a1614 100%);
+  border: 2px solid #8b4513;
+  box-shadow: 0 0 20px rgba(139, 69, 19, 0.3);
+}
+
+.match-modal .modal-header {
+  border-bottom: 1px solid #463931;
+}
+
+.match-modal .modal-footer {
+  border-top: 1px solid #463931;
+}
+
+.matched-title {
+  color: #ffd700;
+  font-family: 'MedievalSharp', cursive;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.matched-list .matched-item {
+  background: rgba(70, 57, 49, 0.4);
+  border: 1px solid #463931;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+  transition: transform 0.2s ease;
+  animation: slideIn 0.5s ease-out forwards;
+  opacity: 0;
+  transform: translateX(-20px);
+}
+
+.matched-list .matched-item:hover {
+  transform: translateX(5px);
+  background: rgba(70, 57, 49, 0.6);
+}
+
+@keyframes slideIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.matched-list .matched-item:nth-child(1) { animation-delay: 0.1s; }
+.matched-list .matched-item:nth-child(2) { animation-delay: 0.2s; }
+.matched-list .matched-item:nth-child(3) { animation-delay: 0.3s; }
+.matched-list .matched-item:nth-child(4) { animation-delay: 0.4s; }
+.matched-list .matched-item:nth-child(5) { animation-delay: 0.5s; }
+
+.total-value {
+  color: #ffd700;
+  font-family: 'MedievalSharp', cursive;
+  font-size: 1.5rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  text-align: right;
+  margin-top: 1rem;
+  animation: pulseValue 2s infinite;
+}
+
+@keyframes pulseValue {
+  0% {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  }
+  50% {
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 
+                 0 0 30px rgba(255, 215, 0, 0.6);
+  }
+  100% {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* Success Modal Animation */
+.success-modal .modal-content {
+  background: linear-gradient(135deg, #2a2522 0%, #1a1614 100%);
+  border: 2px solid #ffd700;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.success-modal .modal-body {
+  padding: 3rem 2rem;
+}
+
+.success-animation {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: successPop 0.5s ease-out forwards;
+}
+
+.success-animation i {
+  font-size: 5rem;
+  color: #4CAF50;
+  animation: successGlow 2s infinite;
+}
+
+.success-modal h4 {
+  color: #ffd700;
+  font-family: 'MedievalSharp', cursive;
+  text-align: center;
+  margin-top: 1.5rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  animation: fadeInUp 0.5s ease-out 0.3s forwards;
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+@keyframes successPop {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes successGlow {
+  0% {
+    filter: drop-shadow(0 0 5px rgba(76, 175, 80, 0.5));
+  }
+  50% {
+    filter: drop-shadow(0 0 20px rgba(76, 175, 80, 0.8));
+  }
+  100% {
+    filter: drop-shadow(0 0 5px rgba(76, 175, 80, 0.5));
+  }
+}
+
+/* Particle Effects */
+.particle-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.success-particle {
+  position: absolute;
+  background: #ffd700;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+@keyframes particle {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--end-x)), calc(-50% + var(--end-y))) scale(0);
+  }
+}
+
+/* Fantasy Banner and Header Styles */
+.fantasy-banner {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  background-image: url('https://images.unsplash.com/photo-1518709766631-a6a7f45921c3?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1200');
+  background-size: cover;
+  background-position: center;
+  border-bottom: 4px solid #8b4513;
+}
+
+.banner-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.6));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.banner-title {
+  font-family: 'MedievalSharp', cursive;
+  color: #ffd700;
+  font-size: 3.5rem;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+  letter-spacing: 2px;
+}
+
+.fantasy-navbar {
+  background: linear-gradient(180deg, #1a1614 0%, #2a2522 100%) !important;
+  border-bottom: 2px solid #8b4513;
+  padding: 0.5rem 0;
+}
+
+.navbar-brand-fantasy {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 1.4rem;
+  color: #ffd700 !important;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+  margin-right: 2rem;
+}
+
+.navbar-section {
+  display: flex;
+  align-items: center;
+}
+
+.fantasy-navbar .nav-link {
+  font-family: 'Cinzel', serif;
+  color: #ffffff !important;
+  font-size: 1.1rem;
+  padding: 0.75rem 1rem !important;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.fantasy-navbar .nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background-color: #ffd700;
+  transform: translateX(-50%);
+  transition: width 0.3s ease;
+}
+
+.fantasy-navbar .nav-link:hover::after {
+  width: 70%;
+}
+
+.fantasy-navbar .nav-link:hover {
+  color: #ffd700 !important;
+}
+
+.fantasy-btn {
+  font-family: 'Cinzel', serif;
+  border: 1px solid #ffd700 !important;
+  color: #ffd700 !important;
+}
+
+.fantasy-btn:hover {
+  background-color: #8b4513 !important;
+  border-color: #8b4513 !important;
+}
+
+@media (max-width: 991px) {
+  .navbar-section:last-child {
+    display: none;
+  }
+  
+  .navbar-collapse .navbar-section {
+    margin-top: 1rem;
+    display: block;
+    width: 100%;
+  }
+  
+  .navbar-collapse .nav {
+    width: 100%;
+  }
+  
+  .navbar-collapse .fantasy-btn,
+  .navbar-collapse .dropdown {
+    margin-top: 0.5rem;
+    width: 100%;
+  }
+  
+  .banner-title {
+    font-size: 2.5rem;
+  }
+}
+
+/* Keep any existing navbar/header styles below */

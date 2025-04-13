@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, ListGroup, Button } from 'react-bootstrap';
-import { Link, useParams } from 'react-router-dom';
-import axios from 'axios';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { getItemById } from '../services/fileSystemService';
 
 const ItemDetailScreen = () => {
   const { t } = useTranslation();
@@ -12,21 +12,48 @@ const ItemDetailScreen = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { id } = useParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchItem = async () => {
       try {
         setLoading(true);
-        const { data } = await axios.get(`${process.env.REACT_APP_API_URL}/api/items/${id}`);
+        const data = await getItemById(id);
         setItem(data);
         setLoading(false);
-      } catch (err) { // Renamed to err to avoid conflict with state variable
-        setError(err.response?.data?.message || err.message);
+      } catch (error) {
+        setError(error.message);
         setLoading(false);
       }
     };
     fetchItem();
   }, [id]);
+
+  const handleUseInAuction = () => {
+    // Create an auction with this item
+    navigate('/auction', { state: { itemId: id } });
+  };
+
+  // Helper function to determine item type from item ID
+  const getItemType = (itemId) => {
+    // Convert to number if it's a string
+    const id = Number(itemId);
+    
+    // Items 1-24 are illustrations
+    if (id >= 1 && id <= 24) {
+      return 'Illustration Item';
+    }
+    // Items 25-48 are sculptures
+    else if (id >= 25 && id <= 48) {
+      return 'Sculpture Item';
+    }
+    // Items 49-72 are products
+    else if (id >= 49 && id <= 72) {
+      return 'Product Item';
+    }
+    
+    return 'Unknown Item Type';
+  };
 
   if (loading) return <h2>{t('loading')}</h2>;
   if (error) return <h3>{t('error', { message: error })}</h3>;
@@ -41,15 +68,12 @@ const ItemDetailScreen = () => {
       <Row>
         <Col md={6}>
           <Card>
-            {/* --- MODIFICATION HERE --- */}
-            {/* Removed fluid prop, added 'img-fluid' to className */}
             <Card.Img
               src={item.image}
               alt={item.name}
-              className="p-3 img-fluid" // Add 'img-fluid' class here
+              className="p-3"
               style={{ maxHeight: '500px', objectFit: 'contain' }}
             />
-            {/* --- END OF MODIFICATION --- */}
           </Card>
         </Col>
 
@@ -61,27 +85,18 @@ const ItemDetailScreen = () => {
 
               <ListGroup variant="flush" className="mt-4">
                 <ListGroup.Item>
-                  <h4>{t('descriptions')}</h4>
-                  {item.descriptions.length > 0 ? (
-                    <ListGroup variant="flush">
-                      {/* --- MODIFICATION FOR REMOVED VALUE --- */}
-                      {item.descriptions.map((desc, index) => (
-                        <ListGroup.Item key={index}>
-                          {/* Only display the attribute now */}
-                          {desc.attribute}
-                        </ListGroup.Item>
-                      ))}
-                      {/* --- END OF MODIFICATION --- */}
-                    </ListGroup>
-                  ) : (
-                    <p>{t('noDescriptions')}</p>
-                  )}
+                  <h4>{t('itemType')}</h4>
+                  <p>{getItemType(item.id)}</p>
+                </ListGroup.Item>
+
+                <ListGroup.Item>
+                  <h4>{t('itemDescription')}</h4>
+                  <p>{getItemTypeDescription(item.id)}</p>
                 </ListGroup.Item>
               </ListGroup>
 
               <Button
-                as={Link}
-                to="/auction"
+                onClick={handleUseInAuction}
                 variant="primary"
                 className="mt-4"
               >
@@ -93,6 +108,23 @@ const ItemDetailScreen = () => {
       </Row>
     </Container>
   );
+};
+
+// Helper function to provide detailed descriptions based on item type
+const getItemTypeDescription = (itemId) => {
+  const id = Number(itemId);
+  
+  if (id >= 1 && id <= 24) {
+    return 'An illustration item depicting artistic elements with detailed craftsmanship. These items are highly valued by illustration collectors.';
+  }
+  else if (id >= 25 && id <= 48) {
+    return 'A sculptural piece showcasing three-dimensional artistry. These items are particularly sought after by sculpture enthusiasts.';
+  }
+  else if (id >= 49 && id <= 72) {
+    return 'A manufactured product with practical applications. These items are especially valuable to product collectors.';
+  }
+  
+  return 'A mysterious item with unknown origins.';
 };
 
 export default ItemDetailScreen;

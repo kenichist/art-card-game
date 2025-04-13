@@ -69,5 +69,20 @@
     "collectorCardsTitle": "Collector Cards",
     "itemCardsTitle": "Auction Items",
     "descriptionCount": "{{count}} description(s)",
-    "navGallery": "Gallery"
-  }
+    "navGallery": "Gallery",
+    "auctionTitle": "Auction Selection",
+    "auctionDescription": "Select items to find matching collectors based on descriptions",
+    "selectForAuction": "Select for Auction",
+    "findCollectors": "Find Matching Collectors",
+    "matching": "Finding Matches...",
+    "currentAuctionItem": "Current Auction Item",
+    "yourCollections": "Your Collections",
+    "placeBid": "Place Bid",
+    "cancel": "Cancel",
+    "confirmBid": "Confirm Bid",
+    "bidSuccessful": "Bid Successfully Placed!",
+    "searchItems": "Search items...",
+    "searchCollectors": "Search collectors...",
+    "noItemsFound": "No items found matching your search",
+    "noCollectorsFound": "No collectors found matching your search"
+}

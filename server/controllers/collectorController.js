@@ -1,115 +1,60 @@
-const Collector = require('../models/collectorModel');
+const { getCollectors, getCollectorById } = require('../services/fileSystemService');
 
 // Get all collectors
-const getCollectors = async (req, res) => {
+const getAllCollectors = async (req, res) => {
   try {
-    const collectors = await Collector.find({});
+    const collectors = getCollectors().map(collector => {
+      // Add descriptions arrays to maintain compatibility with frontend
+      return {
+        ...collector,
+        descriptions: []  // Empty descriptions as we're using hardcoded matching logic
+      };
+    });
     res.json(collectors);
   } catch (error) {
+    console.error('Error getting collectors:', error);
     res.status(500).json({ message: error.message });
   }
 };
 
 // Get collector by ID
-const getCollectorById = async (req, res) => {
+const getCollectorByIdHandler = async (req, res) => {
   try {
-    const collector = await Collector.findOne({ id: req.params.id });
+    const id = parseInt(req.params.id);
+    const collector = getCollectorById(id);
+    
     if (collector) {
-      res.json(collector);
+      // Add descriptions array to maintain compatibility with frontend
+      const result = {
+        ...collector,
+        descriptions: []  // Empty descriptions as we're using hardcoded matching logic
+      };
+      res.json(result);
     } else {
       res.status(404).json({ message: 'Collector not found' });
     }
   } catch (error) {
+    console.error('Error getting collector by ID:', error);
     res.status(500).json({ message: error.message });
   }
 };
 
-// Create new collector
+// These functions are kept for API compatibility but won't actually create/update/delete
 const createCollector = async (req, res) => {
-  try {
-    const { id, name, descriptions } = req.body;
-    
-    // Check if collector with this ID already exists
-    const collectorExists = await Collector.findOne({ id });
-    if (collectorExists) {
-      return res.status(400).json({ message: 'Collector with this ID already exists' });
-    }
-    
-    // Create image path
-    const image = req.file ? `/images/${req.file.filename}` : `/images/collector-${id}.jpg`;
-    
-    // Parse descriptions if they come as a string
-    let parsedDescriptions = descriptions;
-    if (typeof descriptions === 'string') {
-      parsedDescriptions = JSON.parse(descriptions);
-    }
-    
-    const collector = new Collector({
-      id,
-      name,
-      image,
-      descriptions: parsedDescriptions
-    });
-    
-    const createdCollector = await collector.save();
-    res.status(201).json(createdCollector);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+  res.status(400).json({ message: 'Creating new collectors is not supported in file-based mode' });
 };
 
-// Update collector
 const updateCollector = async (req, res) => {
-  try {
-    const { name, descriptions } = req.body;
-    
-    const collector = await Collector.findOne({ id: req.params.id });
-    if (!collector) {
-      return res.status(404).json({ message: 'Collector not found' });
-    }
-    
-    // Update fields
-    collector.name = name || collector.name;
-    
-    // Update image if provided
-    if (req.file) {
-      collector.image = `/images/${req.file.filename}`;
-    }
-    
-    // Parse descriptions if they come as a string
-    if (descriptions) {
-      let parsedDescriptions = descriptions;
-      if (typeof descriptions === 'string') {
-        parsedDescriptions = JSON.parse(descriptions);
-      }
-      collector.descriptions = parsedDescriptions;
-    }
-    
-    const updatedCollector = await collector.save();
-    res.json(updatedCollector);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+  res.status(400).json({ message: 'Updating collectors is not supported in file-based mode' });
 };
 
-// Delete collector
 const deleteCollector = async (req, res) => {
-  try {
-    const collector = await Collector.findOne({ id: req.params.id });
-    if (!collector) {
-      return res.status(404).json({ message: 'Collector not found' });
-    }
-    
-    await collector.remove();
-    res.json({ message: 'Collector removed' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+  res.status(400).json({ message: 'Deleting collectors is not supported in file-based mode' });
 };
 
 module.exports = {
-  getCollectors,
-  getCollectorById,
+  getCollectors: getAllCollectors,
+  getCollectorById: getCollectorByIdHandler,
   createCollector,
   updateCollector,
   deleteCollector

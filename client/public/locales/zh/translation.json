@@ -69,5 +69,10 @@
     "collectorCardsTitle": "收藏家卡片",
     "itemCardsTitle": "拍卖物品",
     "descriptionCount": "{{count}} 个描述",
-    "navGallery": "画廊"
-  }
+    "navGallery": "画廊",
+    "auctionTitle": "拍卖选择",
+    "auctionDescription": "选择物品以根据描述寻找匹配的收藏家",
+    "selectForAuction": "选择参与拍卖",
+    "findCollectors": "寻找匹配的收藏家",
+    "matching": "查找匹配中..."
+}

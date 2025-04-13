@@ -5,7 +5,11 @@ const cors = require('cors');
 const path = require('path');
 const connectDB = require('./db');
 const multer = require('multer');
-require('dotenv').config(); 
+const dotenv = require('dotenv');
+const { ensurePublicDirectories } = require('./services/fileSystemService');
+
+// Load environment variables
+dotenv.config(); 
 
 // Connect to database (Ensure DATABASE_URL env var is set in Vercel)
 connectDB();
@@ -19,7 +23,11 @@ app.use(express.urlencoded({ extended: true }));
 
 // --- Static File Serving (from server/public directory) ---
 // IMPORTANT: Do NOT rely on saving user uploads here in Vercel's serverless environment. Use external storage.
+app.use('/images', express.static(path.join(__dirname, 'public/images')));
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Initialize file system directories and copy images
+ensurePublicDirectories();
 
 // Import routes
 const itemRoutes = require('./routes/itemRoutes');
@@ -52,6 +60,7 @@ const port = process.env.PORT || 5000;
 if (require.main === module) {
     app.listen(port, () => {
         console.log(`Server is running on port ${port}`);
+        console.log(`Images will be served from /images`);
     });
 }
 

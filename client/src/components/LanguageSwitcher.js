@@ -15,6 +15,19 @@ const LanguageSwitcher = () => {
     zh: { nativeName: '中文 (简体)' } // Simplified Chinese
   };
 
+  // Custom popper configuration to ensure dropdown appears in front
+  const popperConfig = {
+    modifiers: [
+      {
+        name: 'preventOverflow',
+        options: {
+          rootBoundary: 'viewport',
+        },
+      },
+    ],
+    strategy: 'fixed',
+  };
+
   return (
     <Dropdown>
       <Dropdown.Toggle variant="outline-light" id="language-dropdown" size="sm">
@@ -22,7 +35,7 @@ const LanguageSwitcher = () => {
         {languages[i18n.resolvedLanguage]?.nativeName || 'Language'}
       </Dropdown.Toggle>
 
-      <Dropdown.Menu>
+      <Dropdown.Menu popperConfig={popperConfig} style={{ zIndex: 9999 }}>
         {/* Map through defined languages to create dropdown items */}
         {Object.keys(languages).map((lng) => (
           <Dropdown.Item
