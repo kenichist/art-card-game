@@ -32,11 +32,21 @@ const AuctionScreen = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   useEffect(() => {
-    // Create audio elements
-    matchSoundRef.current = new Audio('/sounds/match.mp3');
-    successSoundRef.current = new Audio('/sounds/success.mp3');
-    matchSoundRef.current.volume = 0.5;
-    successSoundRef.current.volume = 0.5;
+    // Create audio elements with error handling
+    try {
+      matchSoundRef.current = new Audio('/sounds/success.mp3'); // Using success.mp3 as fallback for both
+      successSoundRef.current = new Audio('/sounds/success.mp3');
+      
+      // Set volume if audio loaded successfully
+      if (matchSoundRef.current) matchSoundRef.current.volume = 0.5;
+      if (successSoundRef.current) successSoundRef.current.volume = 0.5;
+      
+      // Preload the audio files
+      matchSoundRef.current.load();
+      successSoundRef.current.load();
+    } catch (error) {
+      console.warn("Failed to initialize audio:", error);
+    }
 
     return () => {
       // Cleanup audio elements
@@ -120,6 +130,99 @@ const AuctionScreen = () => {
     }
   };
 
+  // Manual translation map for critical matching attributes
+  const manualTranslations = {
+    "Like oil paintings": {
+      en: "Like oil paintings",
+      zh: "喜欢油画"
+    },
+    "Similar color palette": {
+      en: "Similar color palette",
+      zh: "相似的色彩搭配"
+    },
+    // Add more as needed
+  };
+  
+  // Helper function to manually translate attributes if server translation fails
+  const translateMatchedDescriptions = (descriptions, lang) => {
+    if (!descriptions || !Array.isArray(descriptions)) return [];
+    
+    return descriptions.map(desc => {
+      const translation = manualTranslations[desc.attribute]?.[lang];
+      return {
+        ...desc,
+        attribute: translation || desc.attribute
+      };
+    });
+  };
+
+  // Helper function to determine item type from item ID
+  const getItemType = (itemId) => {
+    // Convert to number if it's a string
+    const id = Number(itemId);
+    
+    if (id >= 1 && id <= 24) {
+      return t('illustrationItem');
+    } else if (id >= 25 && id <= 48) {
+      return t('sculptureItem');
+    } else if (id >= 49 && id <= 72) {
+      return t('productItem');
+    } else {
+      return t('unknownItem');
+    }
+  };
+  
+  // Helper function to create a properly translated item name
+  const getTranslatedItemName = (item) => {
+    if (!item) return '';
+    
+    const id = Number(item.id);
+    const type = getItemType(id);
+    
+    // Return a formatted string with the translated type and the original item number
+    return `${type} ${id}`;
+  };
+  
+  // Helper function to determine collector type from image filename
+  const getCollectorType = (imageUrl) => {
+    if (!imageUrl) return t('unknownCollector');
+    const filename = imageUrl.split('/').pop();
+    
+    if (filename.startsWith('i')) {
+      return t('illustrationCollector');
+    } else if (filename.startsWith('p')) {
+      return t('productCollector');
+    } else if (filename.startsWith('s')) {
+      return t('sculptureCollector');
+    }
+    
+    return t('unknownCollector');
+  };
+  
+  // Helper function to get collector number from filename
+  const getCollectorNumber = (imageUrl) => {
+    if (!imageUrl) return '';
+    const filename = imageUrl.split('/').pop();
+    
+    // Example: Extract '1' from 'i1.jpg'
+    if (filename.match(/^[ips]\d+\.jpg$/i)) {
+      return filename.match(/^[ips](\d+)\.jpg$/i)[1];
+    }
+    
+    return '';
+  };
+  
+  // Helper function to create a properly translated collector name
+  const getTranslatedCollectorName = (collector) => {
+    if (!collector || !collector.image) return '';
+    
+    const type = getCollectorType(collector.image);
+    const number = getCollectorNumber(collector.image);
+    
+    // Return a formatted string with the translated type and original collector number
+    return `${type} ${number}`;
+  };
+
   const handleBid = async (collectorId) => {
     try {
       if (!activeAuction || !currentItem) {
@@ -127,9 +230,20 @@ const AuctionScreen = () => {
         return;
       }
 
+      console.log(`[CLIENT] Placing bid with language: ${language}`);
+      
       // Pass the language parameter to the match function
       const matchData = await matchItemWithCollector(currentItem.id, collectorId, language);
-      console.log('Match data received:', matchData); // Debugging the response
+      console.log('[CLIENT] Match data received:', matchData);
+      
+      // Apply manual translation if server didn't translate properly
+      if (language === 'zh') {
+        matchData.matchedDescriptions = translateMatchedDescriptions(
+          matchData.matchedDescriptions, 
+          language
+        );
+      }
+      
       setMatchResults(matchData);
       setShowMatchModal(true);
       matchSoundRef.current?.play().catch(console.error);
@@ -145,13 +259,13 @@ const AuctionScreen = () => {
         return;
       }
 
-      // Update the auction with the match results
+      // Update the auction with the match results - pass language parameter
       await updateAuction(activeAuction._id, {
         collectorId: matchResults.auction.collectorId,
         matchedDescriptions: matchResults.matchedDescriptions,
         totalValue: matchResults.totalValue,
         status: 'completed'
-      });
+      }, language);
 
       setShowMatchModal(false);
       setShowSuccessModal(true);
@@ -201,17 +315,16 @@ const AuctionScreen = () => {
         <Row className="mb-5">
           <Col md={6}>
             <FadeInOnScroll>
-              <Card className="current-item">
-                <Card.Header as="h5">{t('currentAuctionItem')}</Card.Header>
+              <Card>
                 <Card.Img
                   variant="top"
-                  src={currentItem.image}
-                  alt={currentItem.name}
-                  style={{ height: '300px', objectFit: 'contain' }}
+                  src={currentItem?.image}
+                  alt={currentItem?.name}
+                  className="item-image"
                 />
                 <Card.Body>
-                  <Card.Title>{currentItem.name}</Card.Title>
-                  {currentItem.descriptions && (
+                  <Card.Title>{currentItem?.name}</Card.Title>
+                  {currentItem?.descriptions && (
                     <ListGroup variant="flush">
                       {currentItem.descriptions.map((desc, index) => (
                         <ListGroup.Item key={index}>

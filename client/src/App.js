@@ -11,6 +11,7 @@ import CollectorsScreen from './screens/CollectorsScreen';
 import CollectorDetailScreen from './screens/CollectorDetailScreen';
 import AuctionScreen from './screens/AuctionScreen';
 import UploadScreen from './screens/UploadScreen';
+import CustomizationScreen from './screens/CustomizationScreen';
 import { LanguageProvider } from './contexts/LanguageContext';
 
 const App = () => {
@@ -30,6 +31,7 @@ const App = () => {
               <Route path="/collectors/:id" element={<CollectorDetailScreen />} />
               <Route path="/auction" element={<AuctionScreen />} />
               <Route path="/upload" element={<UploadScreen />} />
+              <Route path="/customization" element={<CustomizationScreen />} />
             </Routes>
           </PageTransition>
         </Container>

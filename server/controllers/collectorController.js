@@ -1,4 +1,4 @@
-const { getCollectors, getCollectorById } = require('../services/fileSystemService');
+const { getCollectors, getCollectorById, saveCollectorCustomization } = require('../services/fileSystemService');
 
 // Get all collectors
 const getAllCollectors = async (req, res) => {
@@ -58,10 +58,38 @@ const deleteCollector = async (req, res) => {
   res.status(400).json({ message: 'Deleting collectors is not supported in file-based mode' });
 };
 
+// New function to update collector customization
+const updateCollectorCustomization = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const customData = req.body;
+    
+    if (!id || !customData) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+    
+    const success = saveCollectorCustomization(parseInt(id), customData);
+    
+    if (success) {
+      // Get the updated collector with the requested language
+      const lang = req.query.lang || 'en';
+      const updatedCollector = getCollectorById(id, lang);
+      
+      return res.json(updatedCollector);
+    } else {
+      return res.status(400).json({ message: 'Failed to update collector customization' });
+    }
+  } catch (error) {
+    console.error('Error updating collector customization:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getCollectors: getAllCollectors,
   getCollectorById: getCollectorByIdHandler,
   createCollector,
   updateCollector,
-  deleteCollector
+  deleteCollector,
+  updateCollectorCustomization
 };

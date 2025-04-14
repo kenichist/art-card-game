@@ -61,5 +61,8 @@ router.put('/:id', upload.single('image'), itemController.updateItem);
 
 router.delete('/:id', itemController.deleteItem);
 
+// New route for item customization
+router.post('/customize/:id', itemController.updateItemCustomization);
+
 module.exports = router;
 // --- END OF FILE server/routes/itemRoutes.js ---

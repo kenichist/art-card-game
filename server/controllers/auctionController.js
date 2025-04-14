@@ -1,6 +1,7 @@
 const path = require('path');
 const { getItemById, getCollectorById, getCollectors } = require('../services/fileSystemService');
 const matchingService = require('../services/matchingService');
+const { translateAttributes, translateAttribute } = require('../utils/matchingTranslations');
 
 // In-memory storage for auctions since we're not using MongoDB
 let auctions = [];
@@ -121,35 +122,50 @@ const deleteAuction = async (req, res) => {
 const matchItemWithCollector = async (req, res) => {
   try {
     const { itemId, collectorId } = req.params;
+    // Get language preference from query parameter
+    const language = req.query.lang || 'en';
+    
+    console.log(`[DEBUG] matchItemWithCollector called with language: ${language}`);
     
     // Convert to integers
     const itemIdInt = parseInt(itemId);
     const collectorIdInt = parseInt(collectorId);
     
     // Check if item and collector exist
-    const item = getItemById(itemIdInt);
+    const item = getItemById(itemIdInt, language);
     if (!item) {
       return res.status(404).json({ message: 'Item not found' });
     }
     
-    const collector = getCollectorById(collectorIdInt);
+    const collector = getCollectorById(collectorIdInt, language);
     if (!collector) {
       return res.status(404).json({ message: 'Collector not found' });
     }
     
     // Get matching data from our matrix service
     const matchData = matchingService.getMatchingData(itemIdInt, collectorIdInt);
+    console.log(`[DEBUG] Original attributes:`, matchData.attributes);
+    
+    // Test direct translation of a specific attribute
+    const testAttribute = "Like oil paintings";
+    const testTranslation = translateAttribute(testAttribute, language);
+    console.log(`[DEBUG] Test translation of "${testAttribute}" to ${language}: "${testTranslation}"`);
+    
+    // Translate attributes to requested language
+    const translatedAttributes = translateAttributes(matchData.attributes, language);
+    console.log(`[DEBUG] Translated attributes (${language}):`, translatedAttributes);
     
     // Create format for matched descriptions that the frontend expects
-    const matchedDescriptions = matchData.attributes.map(attr => {
+    const matchedDescriptions = translatedAttributes.map(attr => {
       return {
         attribute: attr,
         value: 0  // We keep this for compatibility with frontend
       };
     });
     
-    console.log('Match data being sent to client:', { 
-      attributes: matchData.attributes,
+    console.log('[DEBUG] Match data being sent to client:', { 
+      language,
+      attributes: translatedAttributes,
       matchedDescriptions,
       totalValue: matchData.value
     });

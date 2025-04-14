@@ -42,20 +42,41 @@ const ItemDetailScreen = () => {
     // Convert to number if it's a string
     const id = Number(itemId);
     
-    // Items 1-24 are illustrations
     if (id >= 1 && id <= 24) {
-      return 'Illustration Item';
+      return t('illustrationItem');
+    } else if (id >= 25 && id <= 48) {
+      return t('sculptureItem');
+    } else if (id >= 49 && id <= 72) {
+      return t('productItem');
+    } else {
+      return t('unknownItem');
     }
-    // Items 25-48 are sculptures
-    else if (id >= 25 && id <= 48) {
-      return 'Sculpture Item';
-    }
-    // Items 49-72 are products
-    else if (id >= 49 && id <= 72) {
-      return 'Product Item';
-    }
+  };
+  
+  // Helper function to create a properly translated item name
+  const getTranslatedItemName = (item) => {
+    if (!item) return '';
     
-    return 'Unknown Item Type';
+    const id = Number(item.id);
+    const type = getItemType(id);
+    
+    // Return a formatted string with the translated type and the original item number
+    return `${type} ${id}`;
+  };
+  
+  // Helper function to provide detailed descriptions based on item type
+  const getItemTypeDescription = (itemId) => {
+    const id = Number(itemId);
+    
+    if (id >= 1 && id <= 24) {
+      return t('illustrationItemDescription');
+    } else if (id >= 25 && id <= 48) {
+      return t('sculptureItemDescription');
+    } else if (id >= 49 && id <= 72) {
+      return t('productItemDescription');
+    } else {
+      return t('unknownItemDescription');
+    }
   };
 
   if (loading) return <h2>{t('loading')}</h2>;
@@ -71,19 +92,31 @@ const ItemDetailScreen = () => {
       <Row>
         <Col md={6}>
           <Card>
-            <Card.Img
-              src={item.image}
-              alt={item.name}
-              className="p-3"
-              style={{ maxHeight: '500px', objectFit: 'contain' }}
-            />
+            <Row>
+              <Col md={6}>
+                <Card.Img 
+                  variant="top" 
+                  src={item.image} 
+                  alt={item.name} 
+                  className="item-detail-img" 
+                />
+              </Col>
+              <Col md={6}>
+                <Card.Body>
+                  <Card.Title className="item-title">{item.name}</Card.Title>
+                  <Card.Text>
+                    {item.description || t('itemDescription')}
+                  </Card.Text>
+                </Card.Body>
+              </Col>
+            </Row>
           </Card>
         </Col>
 
         <Col md={6}>
           <Card>
             <Card.Body>
-              <Card.Title as="h2">{item.name}</Card.Title>
+              <Card.Title as="h2">{getTranslatedItemName(item)}</Card.Title>
               <Card.Text as="h4">{t('itemId', { id: item.id })}</Card.Text>
 
               <ListGroup variant="flush" className="mt-4">
@@ -111,23 +144,6 @@ const ItemDetailScreen = () => {
       </Row>
     </Container>
   );
-};
-
-// Helper function to provide detailed descriptions based on item type
-const getItemTypeDescription = (itemId) => {
-  const id = Number(itemId);
-  
-  if (id >= 1 && id <= 24) {
-    return 'An illustration item depicting artistic elements with detailed craftsmanship. These items are highly valued by illustration collectors.';
-  }
-  else if (id >= 25 && id <= 48) {
-    return 'A sculptural piece showcasing three-dimensional artistry. These items are particularly sought after by sculpture enthusiasts.';
-  }
-  else if (id >= 49 && id <= 72) {
-    return 'A manufactured product with practical applications. These items are especially valuable to product collectors.';
-  }
-  
-  return 'A mysterious item with unknown origins.';
 };
 
 export default ItemDetailScreen;

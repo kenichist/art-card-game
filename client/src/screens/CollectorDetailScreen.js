@@ -36,16 +36,27 @@ const CollectorDetailScreen = () => {
     // Extract filename from image URL
     const filename = imageUrl.split('/').pop();
     
-    // Check if the filename starts with 'i', 'p', or 's'
+    // Get appropriate translation based on collector type prefix
     if (filename.startsWith('i')) {
-      return 'Illustration Collector';
+      return t('illustrationCollector');
     } else if (filename.startsWith('p')) {
-      return 'Product Collector';
+      return t('productCollector');
     } else if (filename.startsWith('s')) {
-      return 'Sculpture Collector';
+      return t('sculptureCollector');
     }
     
-    return 'Collector';
+    return t('unknownCollector');
+  };
+  
+  // Helper function to create a properly translated collector name
+  const getTranslatedCollectorName = (collector) => {
+    if (!collector || !collector.image) return '';
+    
+    const type = getCollectorType(collector.image);
+    const number = getCollectorNumber(collector.image);
+    
+    // Return a formatted string with the translated type and original collector number
+    return `${type} ${number}`;
   };
 
   // Helper function to provide detailed descriptions based on collector type
@@ -53,16 +64,14 @@ const CollectorDetailScreen = () => {
     const filename = imageUrl.split('/').pop();
     
     if (filename.startsWith('i')) {
-      return 'An enthusiast of illustrated works, particularly valuing artistic masterpieces. This collector specializes in acquiring and preserving illustrations of significant cultural or historical importance.';
-    }
-    else if (filename.startsWith('p')) {
-      return 'A product collector with an eye for manufactured items of practical use. This collector appreciates innovative design and functionality in everyday objects.';
-    }
-    else if (filename.startsWith('s')) {
-      return 'A connoisseur of sculptural art forms, focusing on three-dimensional works. This collector values the physical presence and spatial relationships created by sculptural pieces.';
+      return t('illustrationCollectorDescription');
+    } else if (filename.startsWith('p')) {
+      return t('productCollectorDescription');
+    } else if (filename.startsWith('s')) {
+      return t('sculptureCollectorDescription');
     }
     
-    return 'A collector with varied interests across multiple domains.';
+    return t('unknownCollectorDescription');
   };
 
   // Helper function to get collector number from filename
@@ -90,19 +99,31 @@ const CollectorDetailScreen = () => {
       <Row>
         <Col md={6}>
           <Card>
-            <Card.Img
-              src={collector.image}
-              alt={collector.name}
-              className="p-3"
-              style={{ maxHeight: '500px', objectFit: 'contain' }}
-            />
+            <Row>
+              <Col md={6}>
+                <Card.Img 
+                  variant="top" 
+                  src={collector.image} 
+                  alt={collector.name} 
+                  className="collector-detail-img" 
+                />
+              </Col>
+              <Col md={6}>
+                <Card.Body>
+                  <Card.Title className="collector-title">{collector.name}</Card.Title>
+                  <Card.Text>
+                    {collector.description || t('collectorDescription')}
+                  </Card.Text>
+                </Card.Body>
+              </Col>
+            </Row>
           </Card>
         </Col>
 
         <Col md={6}>
           <Card>
             <Card.Body>
-              <Card.Title as="h2">{collector.name}</Card.Title>
+              <Card.Title as="h2">{getTranslatedCollectorName(collector)}</Card.Title>
               <Card.Text as="h4">{t('collectorId', { id: collector.id })}</Card.Text>
 
               <ListGroup variant="flush" className="mt-4">

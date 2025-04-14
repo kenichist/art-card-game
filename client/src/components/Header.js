@@ -32,6 +32,7 @@ const Header = () => {
                 <Nav.Link as={Link} to="/items">{t('navItems')}</Nav.Link>
                 <Nav.Link as={Link} to="/collectors">{t('navCollectors')}</Nav.Link>
                 <Nav.Link as={Link} to="/auction">{t('navAuction')}</Nav.Link>
+                <Nav.Link as={Link} to="/customization">{t('navCustomization') || 'Customize Cards'}</Nav.Link>
               </Nav>
             </Navbar.Collapse>
             

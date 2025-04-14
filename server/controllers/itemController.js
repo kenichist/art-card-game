@@ -1,6 +1,6 @@
 // --- START OF FILE server/controllers/itemController.js ---
 
-const { getItems, getItemById } = require('../services/fileSystemService');
+const { getItems, getItemById, saveItemCustomization } = require('../services/fileSystemService');
 const fs = require('fs'); // Needed for file deletion
 const path = require('path'); // Needed for path joining
 
@@ -89,11 +89,39 @@ const deleteItem = async (req, res) => {
   res.status(400).json({ message: 'Deleting items is not supported in file-based mode' });
 };
 
+// New function to update item customization
+const updateItemCustomization = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const customData = req.body;
+    
+    if (!id || !customData) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+    
+    const success = saveItemCustomization(parseInt(id), customData);
+    
+    if (success) {
+      // Get the updated item with the requested language
+      const lang = req.query.lang || 'en';
+      const updatedItem = getItemById(id, lang);
+      
+      return res.json(updatedItem);
+    } else {
+      return res.status(400).json({ message: 'Failed to update item customization' });
+    }
+  } catch (error) {
+    console.error('Error updating item customization:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getItems: getAllItems,
   getItemById: getItemByIdHandler,
   createItem,
   updateItem,
-  deleteItem
+  deleteItem,
+  updateItemCustomization
 };
 // --- END OF FILE server/controllers/itemController.js ---

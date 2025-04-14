@@ -21,6 +21,44 @@ const CollectorsScreen = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [arrowHover, setArrowHover] = useState({ left: false, right: false });
 
+  // Helper function to determine collector type from image filename
+  const getCollectorType = (imageUrl) => {
+    const filename = imageUrl.split('/').pop();
+    
+    if (filename.startsWith('i')) {
+      return t('illustrationCollector');
+    } else if (filename.startsWith('p')) {
+      return t('productCollector');
+    } else if (filename.startsWith('s')) {
+      return t('sculptureCollector');
+    }
+    
+    return t('unknownCollector');
+  };
+  
+  // Helper function to get collector number from filename
+  const getCollectorNumber = (imageUrl) => {
+    const filename = imageUrl.split('/').pop();
+    
+    // Example: Extract '1' from 'i1.jpg'
+    if (filename.match(/^[ips]\d+\.jpg$/i)) {
+      return filename.match(/^[ips](\d+)\.jpg$/i)[1];
+    }
+    
+    return '';
+  };
+  
+  // Helper function to create a properly translated collector name
+  const getTranslatedCollectorName = (collector) => {
+    if (!collector || !collector.image) return '';
+    
+    const type = getCollectorType(collector.image);
+    const number = getCollectorNumber(collector.image);
+    
+    // Return a formatted string with the translated type and original collector number
+    return `${type} ${number}`;
+  };
+
   useEffect(() => {
     const fetchCollectors = async () => {
       try {
@@ -168,23 +206,17 @@ const CollectorsScreen = () => {
               {currentCollectors.map(collector => (
                 <Col key={collector._id || collector.id} sm={12} md={6} lg={4} xl={3} className="mb-4">
                   <FadeInOnScroll>
-                    <Card className="collector-card h-100">
-                      <Card.Img
-                        variant="top"
-                        src={collector.image}
-                        alt={collector.name}
-                        style={{ height: '200px', objectFit: 'contain' }}
-                      />
+                    <Card className="h-100 collector-card">
+                      <Card.Img variant="top" src={collector.image} alt={collector.name} className="card-img" />
                       <Card.Body>
                         <Card.Title>{collector.name}</Card.Title>
                         <Card.Text>
-                          {t('descriptionCount', { count: collector.descriptions ? collector.descriptions.length : 0 })}
+                          {collector.description || getCollectorType(collector.image)}
                         </Card.Text>
-                        <Button
-                          as={Link}
-                          to={`/collectors/${collector.id}`}
+                        <Button 
+                          as={Link} 
+                          to={`/collectors/${collector.id}`} 
                           variant="primary"
-                          className="w-100"
                         >
                           {t('viewDetails')}
                         </Button>
@@ -215,20 +247,6 @@ const CollectorsScreen = () => {
       )}
     </Container>
   );
-};
-
-const getCollectorType = (imageUrl) => {
-  const filename = imageUrl.split('/').pop();
-  
-  if (filename.startsWith('i')) {
-    return 'Illustration Collector';
-  } else if (filename.startsWith('p')) {
-    return 'Product Collector';
-  } else if (filename.startsWith('s')) {
-    return 'Sculpture Collector';
-  }
-  
-  return 'Collector';
 };
 
 export default CollectorsScreen;

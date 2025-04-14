@@ -59,5 +59,8 @@ router.post('/', upload.single('image'), collectorController.createCollector);
 router.put('/:id', upload.single('image'), collectorController.updateCollector);
 router.delete('/:id', collectorController.deleteCollector);
 
+// New route for collector customization
+router.post('/customize/:id', collectorController.updateCollectorCustomization);
+
 module.exports = router;
 // --- END OF FILE server/routes/collectorRoutes.js ---

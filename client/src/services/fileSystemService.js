@@ -158,3 +158,65 @@ export const updateAuction = async (auctionId, auctionData, lang = null) => {
     throw error;
   }
 };
+
+/**
+ * Update item customization (title and description)
+ * @param {Number} itemId Item ID
+ * @param {Object} customData Custom title and description data
+ * @param {String} lang Language code ('en' or 'zh')
+ * @returns {Promise<Object>} Promise resolving to updated item
+ */
+export const updateItemCustomization = async (itemId, customData, lang = null) => {
+  try {
+    const langParam = lang ? `?lang=${lang}` : '';
+    const response = await fetch(
+      `${process.env.REACT_APP_API_URL}/api/items/customize/${itemId}${langParam}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(customData),
+      }
+    );
+    if (!response.ok) {
+      throw new Error('Failed to update item customization');
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error(`Error updating item customization ${itemId}:`, error);
+    throw error;
+  }
+};
+
+/**
+ * Update collector customization (title and description)
+ * @param {Number} collectorId Collector ID
+ * @param {Object} customData Custom title and description data
+ * @param {String} lang Language code ('en' or 'zh')
+ * @returns {Promise<Object>} Promise resolving to updated collector
+ */
+export const updateCollectorCustomization = async (collectorId, customData, lang = null) => {
+  try {
+    const langParam = lang ? `?lang=${lang}` : '';
+    const response = await fetch(
+      `${process.env.REACT_APP_API_URL}/api/collectors/customize/${collectorId}${langParam}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(customData),
+      }
+    );
+    if (!response.ok) {
+      throw new Error('Failed to update collector customization');
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error(`Error updating collector customization ${collectorId}:`, error);
+    throw error;
+  }
+};

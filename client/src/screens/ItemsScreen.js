@@ -21,6 +21,22 @@ const ItemsScreen = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [arrowHover, setArrowHover] = useState({ left: false, right: false });
 
+  // Helper function to determine item type from item ID
+  const getItemType = (itemId) => {
+    // Convert to number if it's a string
+    const id = Number(itemId);
+    
+    if (id >= 1 && id <= 24) {
+      return t('illustrationItem');
+    } else if (id >= 25 && id <= 48) {
+      return t('sculptureItem');
+    } else if (id >= 49 && id <= 72) {
+      return t('productItem');
+    } else {
+      return t('unknownItem');
+    }
+  };
+
   useEffect(() => {
     const fetchItems = async () => {
       try {
@@ -177,20 +193,15 @@ const ItemsScreen = () => {
                 <Col key={item.id} sm={12} md={6} lg={4} xl={3} className="mb-4">
                   <FadeInOnScroll>
                     <Card className="h-100 item-card">
-                      <Card.Img
-                        variant="top"
-                        src={item.image}
-                        alt={item.name}
-                        style={{ height: '200px', objectFit: 'contain' }}
-                      />
+                      <Card.Img variant="top" src={item.image} alt={item.name} className="card-img" />
                       <Card.Body>
                         <Card.Title>{item.name}</Card.Title>
                         <Card.Text>
-                          {getItemType(item.id)}
+                          {item.description || getItemType(item.id)}
                         </Card.Text>
-                        <Button
-                          as={Link}
-                          to={`/items/${item.id}`}
+                        <Button 
+                          as={Link} 
+                          to={`/items/${item.id}`} 
                           variant="primary"
                         >
                           {t('viewDetails')}
@@ -223,27 +234,6 @@ const ItemsScreen = () => {
       )}
     </Container>
   );
-};
-
-// Helper function to determine item type from item ID
-const getItemType = (itemId) => {
-  // Convert to number if it's a string
-  const id = Number(itemId);
-  
-  // Items 1-24 are illustrations
-  if (id >= 1 && id <= 24) {
-    return 'Illustration Item';
-  }
-  // Items 25-48 are sculptures
-  else if (id >= 25 && id <= 48) {
-    return 'Sculpture Item';
-  }
-  // Items 49-72 are products
-  else if (id >= 49 && id <= 72) {
-    return 'Product Item';
-  }
-  
-  return 'Unknown Item Type';
 };
 
 export default ItemsScreen;
