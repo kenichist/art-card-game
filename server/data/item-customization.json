@@ -1,14 +1,434 @@
 {
   "1": {
-    "title_en": "Illustration Item 1",
-    "title_zh": "Chinese One",
-    "description_en": "English Description 1",
-    "description_zh": "Chinese Description 1"
+    "title_en": "《Christina's World》",
+    "title_zh": "《克里斯蒂娜的世界》",
+    "description_en": "In 1948, American painter Andrew Wise created 《Christina's World》, a painting of a teenage girl with polio, prostrating herself on the grass, looking wistfully at a wooden house that towers over the horizon. Showed the inexplicable sadness.\n",
+    "description_zh": "1948年，美国画家安德鲁·怀斯创作了《克里斯蒂娜的世界》，画的是一个患有小儿麻痹症的少女趴在草地上，惆怅地望着地平线上高耸的木屋。表现出莫名的悲伤。\n"
+  },
+  "2": {
+    "title_en": "《Self-portrait》",
+    "title_zh": "《自画像》",
+    "description_en": "《Self-portrait》was painted in 1889 by Vincent van Gogh, who was a classic post-impressionist\nThrough \"Self-Portrait\", Van Gogh shows a deep reflection on the self, with a strong use of color, full of emotional tension, showing the personalized treatment in the post-impressionism style.\n",
+    "description_zh": "《自画像》是文森特·梵高于1889年创作的，他是一位典型的后印象派画家。通过《自画像》，梵高展现了对自我的深刻反思，色彩运用强烈，充满情感张力，表现出后印象派风格的个性化处理。\n"
+  },
+  "3": {
+    "title_en": "《Mona Lisa》",
+    "title_zh": "《蒙娜丽莎》",
+    "description_en": "《Mona Lisa》 is an oil painting created by Italian Renaissance painter Leonardo Da Vinci from 1503 to 1517. It represents the aesthetic direction of the Renaissance period. The work reflects the profound and noble ideological quality of women, and reflects the aesthetic concept and pursuit of women's beauty in the Renaissance period.\n",
+    "description_zh": "《蒙娜丽莎》是意大利文艺复兴时期画家列奥纳多·达·芬奇于1503年至1517年创作的油画。它代表了文艺复兴时期的审美方向。作品体现了女性深邃高贵的思想品质，体现了文艺复兴时期对女性美的审美观念和追求。\n"
+  },
+  "4": {
+    "title_en": "《Madonna Litta》",
+    "title_zh": "《圣母利塔》",
+    "description_en": "《Madonna Litta》is a religious painting created by Leonardo da Vinci in the late 15th century. It depicts an image of a lactating woman with an open window in the background, emphasizing the theme of motherhood and female beauty.\n",
+    "description_zh": "《圣母利塔》是列奥纳多·达·芬奇在15世纪末创作的一幅宗教画。以打开的窗户为背景，描绘了哺乳期妇女的形象，强调了母性和女性美的主题。\n"
+  },
+  "5": {
+    "title_en": "《LaSource》",
+    "title_zh": "《泉》",
+    "description_en": "《LaSource》is a cloth painting created by French neoclassical painter Ingres from 1830 to 1856. The painting shows the classical beauty of female human body with changeable colors and soft curves. The naked woman's hands pour out the water in the clay pot, and the slightly bent knees and hand muscles create an elegant, pure and refined beauty.\n",
+    "description_zh": "《泉》是法国新古典主义画家安格尔从1830年到1856年创作的一幅布艺画。这幅画以多变的色彩和柔和的曲线展现了女性人体的古典美。裸女双手倒出陶罐中的水，微微弯曲的膝盖和手部肌肉，营造出一种优雅、纯净、脱俗的美。\n"
+  },
+  "6": {
+    "title_en": "《Dream》",
+    "title_zh": "《梦》",
+    "description_en": "《Dream》 is a famous representative work of cubist painter Picasso in 1932, when the 50-year-old Picasso depicted his young lover Marie Teresa Walter. This work can be said to be the most perfect embodiment of Picasso's love for spirit and body.\n",
+    "description_zh": "《梦》是立体派画家毕加索在1932年创作的著名代表作，当时50岁的毕加索描绘了他年轻的情人玛丽·特蕾莎·沃尔特。这幅作品可以说是毕加索对精神和身体热爱的最完美体现。\n"
+  },
+  "7": {
+    "title_en": "《The Girl of Avignon》",
+    "title_zh": "《阿维尼翁少女》",
+    "description_en": "《The Girl of Avignon》 is a representative work of early cubism by Spanish cubist painter Picasso in 1907. This painting depicts prostitutes in the street. The whole human body is assembled by various geometric planes, and all the three-dimensional elements are transformed into plane.\n",
+    "description_zh": "《阿维尼翁少女》是西班牙立体派画家毕加索1907年创作的早期立体主义代表作。这幅画描绘了街上的妓女。整个人体由各种几何平面组装而成，所有的三维元素被转化为平面。\n"
+  },
+  "8": {
+    "title_en": "《Starry Night》",
+    "title_zh": "《星空》",
+    "description_en": "《Starry Night》 is a famous painting by Dutch post-impressionist painter Vincent van Gogh in 1889. The painting depicts the moving stars and clouds in the night sky, full of motion and emotion. His strong brushwork and colors show his unique perception of nature. It also shows his inner anxiety and uneasiness and deep thinking about the universe and nature.\n",
+    "description_zh": "《星空》是荷兰后印象派画家文森特·梵高1889年创作的著名作品。这幅画描绘了夜空中流动的星星和云层，充满了动态与情感。浓烈的笔触和鲜艳的色彩，展现了他对自然的独特感知。也表现了他内心的焦虑与不安及对宇宙和自然的深沉思考。\n"
+  },
+  "9": {
+    "title_en": "《Sunflowers》",
+    "title_zh": "《向日葵》",
+    "description_en": "《Sunflowers》 is a classic 1888 painting by Dutch post-impressionist painter Vincent van Gogh. The painting depicts a sunflower in full bloom, full of vitality and the breath of sunshine. Van Gogh used bright yellow and orange tones to express the unique texture and strong vitality of flowers. It shows his love of nature and his bold exploration of color and light and shadow.\n",
+    "description_zh": "《向日葵》是荷兰后印象派画家文森特·梵高1888年创作的经典作品。这幅画描绘了盛开的向日葵，充满了生命力和阳光的气息。梵高采用鲜艳的黄色和橙色调，表现了花朵的独特质感和强烈的生命力。展现了他对自然的热爱以及对色彩和光影的大胆探索。\n"
+  },
+  "10": {
+    "title_en": "《Liberty Leads the People》",
+    "title_zh": "《自由引领人民》",
+    "description_en": "《Liberty Leads the People》 is a romantic painting painted by French painter Delacrois in 1830. The painter praised the revolutionary movement of workers, petty bourgeoisie and intellectuals with unfetching enthusiasm. \n",
+    "description_zh": "《自由引领人民》是法国画家德拉克罗瓦在1830年创作的一幅浪漫主义画作。画家对工人、小资产阶级和知识分子的革命运动给予了不甚热情的赞扬。\n"
   },
   "11": {
-    "title_en": "Illustration Item 11",
-    "title_zh": "插画物品 11",
-    "description_en": "",
+    "title_en": "《The first time that he received the kiss of the God of Love》",
+    "title_zh": "《他第一次得到爱神的吻》",
+    "description_en": "《The first time that he received the kiss of the God of Love》was a romantic painting created by the French painter Gerard in 1798. In terms of artistic expression, he showed the beauty of the goddess with decorative colors, and balanced and harmonious composition.\n",
+    "description_zh": "《他第一次得到爱神的吻》是法国画家杰拉德在1798年创作的一幅浪漫主义画作。在艺术表现上，他以装饰色彩、平衡和谐的构图来表现女神之美。\n"
+  },
+  "12": {
+    "title_en": "《The Continuation of Memory》",
+    "title_zh": "《记忆的延续》",
+    "description_en": "《The Continuation of Memory》is one of the representative works of the famous Spanish painter Salvador Dali. It was completed in 1931. Dali's work, which is both powerful and moving, has come to be regarded as a classic of surrealism, with his meticulous realistic approach to creating startling non-realistic images.\n",
+    "description_zh": "《记忆的延续》是西班牙著名画家萨尔瓦多·达利的代表作之一。它完工于1931年。达利的作品，既有力又感人，已经被认为是超现实主义的经典，他一丝不苟的现实主义方法来创造惊人的非现实图像。\n"
+  },
+  "13": {
+    "title_en": "《The Gleaners》",
+    "title_zh": "《拾秽者》",
+    "description_en": "《The Gleaners》 is one of the most famous works by French Barbizon painter Jean-Francois Miller. It was painted on canvas in 1857. The painting depicts three peasant women picking up wheat ears in the field in autumn. The color is bright and soft, which embodies Miller's deep feelings on the farmer's life. It is a typical representative work of realistic art style.\n",
+    "description_zh": "《拾秽者》是法国巴比松画家让-弗朗索瓦·米勒最著名的作品之一。它是1857年画在帆布上的。这幅画描绘了三个农妇在秋天的田野里捡麦穗的情景。色彩明亮柔和，体现了米勒对农民生活的深厚感情。它是现实主义艺术风格的典型代表作品。\n"
+  },
+  "14": {
+    "title_en": "《The Blind Girl》",
+    "title_zh": "《盲女》",
+    "description_en": "《The Blind Girl》is an oil painting created by British painter John E. Millay in 1856. It depicts a natural scene after a rainy day. The scene is relatively open and the color is comfortable. Two poor girls are drawn in the foreground, telling the girl's troubled life and sorrow.\n",
+    "description_zh": "《盲女》是英国画家约翰·米莱于1856年创作的一幅油画。它描绘了一个雨天后的自然景象。场景相对开阔，色彩舒适。两个可怜的女孩被画在前景中，讲述了女孩坎坷的生活和悲伤。\n"
+  },
+  "15": {
+    "title_en": "《A Boy with a Soap Bubble》",
+    "title_zh": "《拿着肥皂泡的男孩》",
+    "description_en": "《A Boy with a Soap Bubble》is a custom oil painting on canvas by Baptiste Simon Chardin in 1730. In the painting, a shabby but tidy boy is blowing soap bubbles from the indoor to the outdoor, which reflects the natural, frugal, honest and kind feelings of the children of the lower class.\n",
+    "description_zh": "《拿着肥皂泡的男孩》是巴蒂斯特·西蒙·夏尔丹于1730年在画布上创作的一幅定制油画。画中，一个衣衫褴褛但整洁的男孩从室内向室外吹着肥皂泡，这反映了底层孩子们自然、节俭、诚实、善良的感情。\n"
+  },
+  "16": {
+    "title_en": "《Sunrise，Impressions》",
+    "title_zh": "《日出·印象》",
+    "description_en": "《Sunrise，Impressions》 is an 1872 oil painting by French artist Claude Monet. It depicts a sunrise over a harbor in France. It embodies impressionist characteristics, adopts bright colors and loose brushstrokes, abandons the details depicted in traditional paintings, and pays more attention to light changes and natural landscape atmosphere.\n",
+    "description_zh": "《日出·印象》是法国画家克劳德·莫奈1872年创作的油画。描绘了法国一处港湾的日出景象。体现了印象派的特征，采用了明亮的色调和松散的笔触，摒弃了传统绘画中的细节描绘，更多关注的是光线变化和自然景观氛围。\n"
+  },
+  "17": {
+    "title_en": "《Skrik》",
+    "title_zh": "《呐喊》",
+    "description_en": "《Skrik》 is a painting created by Norwegian painter Edvard Munch in 1893.\nThe characters cover their ears with their hands, trying to avoid the screams coming from around them. This painting is a famous work of expressionism painting, eulogizing \"life, love and death\" as the theme, revealing the worry and fear of human beings at the end of the century\n",
+    "description_zh": "《呐喊》是挪威画家爱德华·蒙克在1893年创作的一幅画作。\n角色们用手捂住耳朵，试图避开周围传来的尖叫声。这幅画是表现主义绘画的著名作品，以讴歌“生、爱、死”为主题，揭示了世纪末人类的忧虑与恐惧。\n"
+  },
+  "18": {
+    "title_en": "《The Weeping Woman》",
+    "title_zh": "《哭泣的女人》",
+    "description_en": "《The Weeping Woman》 is an abstract portrait painted by Spanish painter Pablo Ruiz Picasso on October 26, 1937. The picture of this work is a chaotic face, combining cubism and surrealism, showing the scene of pain and helplessness of people in the bottom society.\n",
+    "description_zh": "《哭泣的女人》是西班牙画家巴勃罗·鲁伊斯·毕加索于1937年10月26日创作的一幅抽象肖喜欢画。这幅作品的画面是一张混乱的脸，结合了立体主义和超现实主义，表现了底层社会人们痛苦和无助的场景。\n"
+  },
+  "19": {
+    "title_en": "《Portrait of Unknown Woman》 ",
+    "title_zh": "《无名女子肖像》",
+    "description_en": "《Portrait of Unknown Woman》 is a realistic portrait painted in oil on canvas by Russian painter Ivan Nikolaevich Kramskoy in 1883. The painting shows the image of a resolute Russian intellectual woman. The whole picture uses a strong contrast of light and dark and harmonious tone, the work with the element of realism.\n",
+    "description_zh": "《无名女子肖像》是俄罗斯画家伊万·尼古拉耶维奇·克拉姆斯科伊于1883年在帆布上用油画创作的一幅现实主义肖像画。这幅画展现了一个坚毅的俄罗斯知识女性的形象。整个画面采用了明暗对比强烈的和谐色调，作品带有写实主义的元素。\n"
+  },
+  "20": {
+    "title_en": "《Tempest》",
+    "title_zh": "《暴风雨》",
+    "description_en": "The 《Tempest》 by French artist Cault, painted in 1880, captures the moment when Dapneis and Chloe run away in a storm. It expresses the beauty of the sexy power of men and women, and celebrates the pure love and the yearning for freedom.\n",
+    "description_zh": "法国艺术家考特于1880年创作的《暴风雨》，捕捉到了达芙妮斯和克洛伊在暴风雨中逃跑的瞬间。它表达了男女的性感力量之美，颂扬纯洁的爱情和对自由的向往。\n"
+  },
+  "21": {
+    "title_en": "《Concerto of Gray and Black》",
+    "title_zh": "《灰与黑协奏曲》",
+    "description_en": "《Concerto of Gray and Black》 is an oil painting by American painter Whistler in 1871. The author is full of enthusiasm and reverence to create a serious and pious, simple and unadorned typical American mother image, with a touching charm.\n",
+    "description_zh": "《灰与黑协奏曲》是美国画家惠斯勒于1871年创作的油画。作者以饱满的热情和崇敬塑造了一个严肃虔诚、朴实无华的典型美国母亲形象，具有动人的魅力。\n"
+  },
+  "22": {
+    "title_en": "《broken pot》",
+    "title_zh": "《破碎的罐子》",
+    "description_en": "The 《broken pot》 is an oil painting created by the French writer Gretz. This portrait shows a very lovely and beautiful young lady. The painting is full of the powder of palace ladies, which propagates the family moral concept of the bourgeoisie at that time.\n",
+    "description_zh": "《破碎的罐子》是法国作家格雷茨创作的一幅油画。这幅肖像展示了一位非常可爱和美丽的年轻女士。这幅画充满了宫女的粉末，宣传了当时资产阶级的家庭道德观。\n"
+  },
+  "23": {
+    "title_en": "《Pine Forest morning》",
+    "title_zh": "《松林清晨》",
+    "description_en": "《Pine Forest morning》 is a landscape painting by Russian painter Shishkin. The pine forest wakes up, and a few black bears play and play, adding life to the quiet pine forest. Tall pine forest, divided into close, medium and long view, the richness of the level strengthens the sense of space, showing a vibrant scene.\n",
+    "description_zh": "《松林清晨》是俄罗斯画家希什金的一幅风景画。松林苏醒了，几只黑熊嬉戏玩耍，给宁静的松林增添了生机。高大的松林，分为近景、中景和长景，层次感的丰富强化了空间感，呈现出一派生机勃勃的景象。\n"
+  },
+  "24": {
+    "title_en": "《The Satyrs and the Fairies》 ",
+    "title_zh": "《森林之神与仙女们》",
+    "description_en": "《The Satyrs and the Fairies》 is a painting by the French painter Bouguereau in 1876. It depicts a forest god playing with fairies. Bouguereau shows the beautiful and smooth body lines of fairies through delicate brushwork. The work is full of poetry, not only the reappearance of classical mythology, but also reflects Bouguereau's profound thinking on human nature and nature, \n",
+    "description_zh": "《森林之神与仙女们》，由法国画家布格罗于 1876 年创作。画中描绘了森林之神与仙女们嬉戏的场景。布格罗通过细腻的笔触，展现了仙女们优美流畅的身体线条。作品充满诗意，不仅是对古典神话的再现，也体现了布格罗对人性与自然的深刻思考，是浪漫主义绘画的佳作。\n"
+  },
+  "25": {
+    "title_en": "《Discobolus》",
+    "title_zh": "《铁饼》",
+    "description_en": "The famous sculpture 《Discobolus》depicts a discus thrower in mid-action, crafted by the ancient Greek sculptor Myron around 460-450 BC. It symbolizes athletic excellence and the beauty of human movement in Greek culture. Myron's mastery is evident in the dynamic pose, capturing a moment of tension and grace, typical of Classical Greek art.\n",
+    "description_zh": "著名的雕塑《铁饼》描绘了一个正在投掷铁饼的人，由古希腊雕塑家迈伦于公元前460-450年制作。在希腊文化中，它象征着运动的卓越和人类运动的美丽。迈伦的高超技艺体现在动态的姿势上，捕捉到了紧张和优雅的瞬间，这是典型的古典希腊艺术。\n"
+  },
+  "26": {
+    "title_en": "《David》",
+    "title_zh": "《大卫》",
+    "description_en": "The famous sculpture 《David》 depicts the biblical hero David before his battle with Goliath. Crafted by the Italian Renaissance artist Michelangelo between 1501 - 1504, it's made of marble. In the religious context, it represents David's courage and faith. This work, with its contrapposto pose, is a masterpiece of the Renaissance style. \n",
+    "description_zh": "著名的雕塑《大卫》描绘了圣经中的英雄大卫在与歌利亚战斗之前的情景。它是由意大利文艺复兴时期的艺术家米开朗基罗在1501 - 1504年间制作的，由大理石制成。在宗教语境中，它代表了大卫的勇气和信仰。这幅摆着对位姿势的作品是文艺复兴风格的杰作。\n"
+  },
+  "27": {
+    "title_en": "《Truth Unveiled by Time》",
+    "title_zh": "《被时间揭开的真相》",
+    "description_en": "The famous sculpture 《Truth Unveiled by Time》 depicts a naked young woman representing Truth. Crafted by the Italian sculptor Gian Lorenzo Bernini from 1645 - 1652, it's made of marble. Showcasing the Italian Baroque style, it symbolizes the idea that truth will be revealed over time. \n",
+    "description_zh": "著名的雕塑《被时间揭开的真相》描绘了一个裸体的年轻女子来表现真理。它由意大利雕塑家吉安·洛伦佐·贝尔尼尼于1645 - 1652年制作，由大理石制成。它展示了意大利巴洛克风格，象征着随着时间的推移，真相将被揭示的理念。\n"
+  },
+  "28": {
+    "title_en": "《The Pietà.》",
+    "title_zh": "《哀悼基督》",
+    "description_en": "《The Pietà.》by Michelangelo Buonarroti, an Italian sculptor, completed in 1499. This masterpiece depicts the Virgin Mary holding the body of Jesus Christ after the Crucifixion, symbolizing sorrow, compassion, and the Christian theme of redemption through sacrifice. It's renowned for its exquisite detail and emotional intensity, \n",
+    "description_zh": "《哀悼基督》，由意大利雕塑家米开朗基罗·博那罗蒂创作，于1499年完成。这件杰作描绘了圣母玛利亚在耶稣基督被钉死在十字架后抱着他的遗体的场景，象征着悲痛、怜悯，以及基督教中通过牺牲获得救赎的主题。它以其精湛的细节和强烈的情感表达而闻名。 \n"
+  },
+  "29": {
+    "title_en": "《The Statue of Liberty》",
+    "title_zh": "《自由女神像》",
+    "description_en": "The famous sculpture 《The Statue of Liberty》depicts a robed female figure representing Libertas. It is designed by the French sculptor Frédéric Auguste Bartholdi and dedicated in 1886. And its colossal scale and neoclassical design have made it an iconic symbol of the United States and of freedom worldwide.\n",
+    "description_zh": "著名的雕塑《自由女神像》描绘了一个穿着长袍的女性形象，代表着自由主义者。它由法国雕塑家Frédéric Auguste Bartholdi设计，于1886年落成。它巨大的规模和新古典主义的设计使它成为美国和世界自由的标志性象征。\n"
+  },
+  "30": {
+    "title_en": "《Venus de Milo》",
+    "title_zh": "《米洛的维纳斯》",
+    "description_en": "The famous sculpture 《Venus de Milo》 was created around 150 BC by the Greek sculptor Alexandros. Crafted from Parian marble, it shows the Greek goddess of love. It blends classical and Hellenistic styles. Discovered in 1820, now at the Louvre, it symbolizes beauty in Greek culture. \n",
+    "description_zh": "著名的雕塑《米洛的维纳斯》是希腊雕塑家亚历山德罗斯在公元前150年左右创作的。它由巴黎大理石制成，表现了希腊的爱神的形象。它融合了古典和希腊风格。它于1820年被发现，现藏于卢浮宫，在希腊文化中是美的象征。\n"
+  },
+  "31": {
+    "title_en": "《The Thinker》",
+    "title_zh": "《思想者》",
+    "description_en": "《The Thinker》 is one of the masterpieces of the French sculptor Auguste Rodin, painted between 1880 and 1882. The sculpture depicts a naked man sitting on a rock, his chin supported by his fist on the top of his head, and his eyes are deep and seemingly deep in thought, expressing an exploration of the power and depth of the human mind.\n",
+    "description_zh": "《思想者》是法国雕塑家奥古斯特·罗丹的代表作之一，创作于1880年至1882年。雕塑描绘了一个裸体男子坐在一块岩石上，他的下巴用拳头顶在头顶，他的眼睛深邃，似乎在思考，表达了对人类心灵的力量和深度的探索。\n"
+  },
+  "32": {
+    "title_en": "《The Goddess of Victory》",
+    "title_zh": "《胜利女神》",
+    "description_en": "《The Goddess of Victory》 is the original of a famous masterpiece from the Hellenistic period (Hellenistic), whose author has not been able to trace. The goddess of victory leans forward slightly, that robust and plughty, graceful body, flying high and vigorous and large wings, fully reflected the heroic posture of the victor and the passion of triumph. \n",
+    "description_zh": "《胜利女神》是希腊化时期（希腊化）一部著名名著的原著，其作者已无从考证。胜利女神身体微微前倾，那粗壮壮实、婀娜多姿的身躯，飞得高高雄健的大翅膀，充分体现了胜利者的豪迈姿态和胜利的激情。\n"
+  },
+  "33": {
+    "title_en": "《Bird in Space》",
+    "title_zh": "《太空中的鸟》",
+    "description_en": "《Bird in Space》 is a famous work by the Romanian sculptor Constantin Brancuși, which was created in the early 1920s. It shows an abstract bird with a streamlined sculptural form that shows a sense of movement and lightness, expressing his unique interpretation of nature and movement through simplified and abstracted forms.\n",
+    "description_zh": "《太空中的鸟》是罗马尼亚雕塑家康斯坦丁Brancuși的著名作品，创作于20世纪20年代初。这是一只抽象的鸟，以流线型的雕塑形式表现出运动和轻盈感，通过简化和抽象的形式表达了他对自然和运动的独特诠释。\n"
+  },
+  "34": {
+    "title_en": "《David》",
+    "title_zh": "《大卫》",
+    "description_en": "Italian Renaissance sculptor Donatello's magnificent bronze statue of 《David》, dating back more than 100 years, originated from the story of the Bible. Donatello's bronze cast of David, young and brooding, with intricate light and shade, is his most classical work and the earliest large, independent nude statue of the Renaissance.\n",
+    "description_zh": "意大利文艺复兴时期雕刻家多纳泰罗以《圣经》故事为原型，创作了100多年前的“大卫”铜像。多纳泰罗的青铜大卫雕像，年轻而深沉，有着复杂的明暗，是他最古典的作品，也是文艺复兴时期最早的大型独立裸体雕像。\n"
+  },
+  "35": {
+    "title_en": "《The bronze Knight》",
+    "title_zh": "《青铜骑士》",
+    "description_en": "《The bronze Knight》, also known as the Peter the Great statue, stands on Senate Square in St Petersburg, Russia. Created by French sculptor Etienne Maurice Falcone in the mid-18th century and completed in 1768, it depicts the Russian Emperor Peter the Great on horseback, pointing to the distant future and symbolizing his leadership and modernization efforts.\n",
+    "description_zh": "《青铜骑士》，也被称为彼得大帝雕像，矗立在俄罗斯圣彼得堡的参议院广场。这幅画由法国雕塑家艾蒂安·莫里斯·法尔科内于18世纪中期创作，完成于1768年，描绘了骑在马背上的俄罗斯皇帝彼得大帝，指向遥远的未来，象征着他的领导能力和现代化努力。\n"
+  },
+  "36": {
+    "title_en": "《The Dying Gladiator》",
+    "title_zh": "《垂死的角斗士》",
+    "description_en": "《The Dying Gladiator》 is a 1779 work by French artist Pierre Julien. The sculpture depicts the moment when a gladiator, badly wounded in battle, falls to the ground and dies. This work not only shows the beauty of the gladiator's body, but also deeply conveys his inner pain and helplessness.\n",
+    "description_zh": "《垂死的角斗士》是法国艺术家皮埃尔·朱利安1779年的作品。这尊雕塑描绘了一名在战斗中受重伤的角斗士倒地而死的时刻。这幅作品不仅表现了角斗士的身体之美，更深刻地传达了他内心的痛苦与无奈。\n"
+  },
+  "37": {
+    "title_en": "《The Vision of Constantine》",
+    "title_zh": "《君士坦丁的幻象》",
+    "description_en": "《The Vision of Constantine》 is a magnificent marble sculpture created by Italian Baroque master GianLorenzo Benini in 1670, which shows his remarkable sculptural skills and deep understanding of religious subjects. The work perfectly captures the shock and awe of Constantine as he witnessed the vision in the statue, making the scene full of drama and visual impact.\n",
+    "description_zh": "《君士坦丁的幻象》是意大利巴洛克艺术大师贝尼尼于1670年创作的一件华丽的大理石雕塑作品，表现了他非凡的雕塑技巧和对宗教主题的深刻理解。这幅作品完美地捕捉到了君士坦丁目睹雕像中的景象时的震惊和敬畏，使现场充满了戏剧性和视觉冲击。\n"
+  },
+  "38": {
+    "title_en": "《The Angel Crowned with Thorns》",
+    "title_zh": "《戴荆棘王冠的天使》",
+    "description_en": "《The Angel Crowned with Thorns》 is a marble statue created by Italian master GianLorenzo Benini and his workshop between 1667 and 1669. Benigni's carving skills are perfectly displayed in this statue. The angel's head was low, and his eyes were soft and sad. The artistic representation of the religious theme is also a typical representative of Benigni's Baroque style.\n",
+    "description_zh": "《戴荆棘王冠的天使》是意大利大师贝尼尼和他的工作室在1667年至1669年间创作的大理石雕像。贝尼尼的雕刻技巧在这座雕像中得到了完美的展示。天使低着头，眼神柔和而忧伤。宗教主题的艺术表现也是贝尼尼巴洛克风格的典型代表。\n"
+  },
+  "39": {
+    "title_en": "《Moses》",
+    "title_zh": "《摩西》",
+    "description_en": "《Moses》 is a magnificent statue created by Michelangelo in 1513 for the tomb of Pope Julius II. The statue depicts the Biblical prophet Moses. The statue is about 235cm tall and is filled with Michelangelo's deep understanding of human anatomy. Moses has a complex facial expression, a furrowed brow, and firm eyes that show deep thought and firm faith.\n",
+    "description_zh": "《摩西》是米开朗基罗在1513年为教皇尤利乌斯二世的坟墓而建造的一座宏伟的雕像。这尊雕像描绘的是圣经中的先知摩西。雕像高约235厘米，充满了米开朗基罗对人体解剖学的深刻理解。摩西有着复杂的面部表情，眉头紧锁，眼神坚定，显示出深沉的思想和坚定的信念。\n"
+  },
+  "40": {
+    "title_en": "《Despair》",
+    "title_zh": "《绝望》",
+    "description_en": "《Despair》 is a marble sculpture created in 1869 by French sculptor Jean-Joseph Perrault. Perot is known for his delicate sculpting skills and deep emotional expression. Through the image of a young man, this sculpture shows the emotion of extreme pain and helplessness, making the viewer feel the struggle of people in extreme pain and helplessness.\n",
+    "description_zh": "《绝望》是法国雕塑家让-约瑟夫·佩罗于1869年创作的大理石雕塑。佩罗以其细腻的雕刻技巧和深刻的情感表达而闻名。这件雕塑通过一个年轻人的形象，表现出极度痛苦和无助的情绪，让观者感受到人们在极度痛苦和无助中挣扎。\n"
+  },
+  "41": {
+    "title_en": "《Ophelia》",
+    "title_zh": "《奥菲利亚》",
+    "description_en": "《Ophelia》, an 1880 work by the French artist Sarah Bernhardt, shows Ophelia with soft body lines and slightly closed eyes. The surrounding flowers and plants are exquisitely detailed, adding to the natural beauty and lyrical atmosphere of the work. Bernhardt's attention to detail is particularly excellent, especially in Ophelia's hair tips and flowers, showing off her exquisite sculpting skills.\n",
+    "description_zh": "1880年法国画家莎拉·伯恩哈特的作品《奥菲利亚》中，奥菲利亚有着柔和的身体线条和微闭的眼睛。周围的花草精致细致，增添了作品的自然美和抒情氛围。伯恩哈特对细节的关注尤其出色，尤其是在奥菲利亚的发梢和花朵上，展示了她精湛的雕刻技巧。\n"
+  },
+  "42": {
+    "title_en": "《Sleeping Heber》",
+    "title_zh": "《沉睡的希伯》",
+    "description_en": "《Sleeping Heber》 is a marble statue created around 1869 by the famous 19th-century French sculptor Albert-Ernest Carille-Belleuse. This sculpture successfully captures the innocence and serenity of the goddess of youth and frames it in marble. This sense of movement in the static is also a major feature of Carille-Bayless's works.\n",
+    "description_zh": "《沉睡的希伯》是19世纪法国著名雕塑家阿尔伯特·欧内斯特·卡里尔-贝勒琉斯在1869年左右创作的大理石雕像。这个雕塑成功地捕捉了青春女神的天真和宁静，并将其框在大理石上。这种静态中运动的感觉也是卡里尔-贝勒斯作品的一个主要特征。\n"
+  },
+  "43": {
+    "title_en": "《Saint Christopher》",
+    "title_zh": "《圣克里斯托弗》",
+    "description_en": "《Saint Christopher》 is a bronze statue created by German sculptor Arno Blake in 1957. St. Christopher, a legendary giant and saint known for his great strength and steadfast faith, is often depicted carrying the infant Jesus across a river. This statue perfectly represents the combination of Saint Christopher's divine mission and his human strength.\n",
+    "description_zh": "《圣克里斯托弗》是德国雕塑家阿诺·布莱克于1957年创作的铜像。圣克里斯托弗，一个传说中的巨人和圣徒，以其强大的力量和坚定的信仰而闻名，经常被描绘成抱着婴儿耶稣过河。这座雕像完美地代表了圣克里斯托弗的神圣使命和他的人类力量的结合。\n"
+  },
+  "44": {
+    "title_en": "《The Bust of Louis XIV》",
+    "title_zh": "《路易十四半身像》",
+    "description_en": "《The Bust of Louis XIV》 is an outstanding marble statue created in 1665 by Italian Baroque master GianLorenzo Benigni. This bust transmits the majesty and momentum of the French \"Sun King\" Louis XIV, providing the pursuit of movement and drama of Baroque art, so that the viewer can feel the strong atmosphere and outstanding charm of the king.\n",
+    "description_zh": "《路易十四半身像》是意大利巴洛克艺术大师贝尼尼于1665年创作的一尊杰出的大理石雕像。这尊半身像传达了法国“太阳王”路易十四的威严和气势，提供了巴洛克艺术对运动和戏剧的追求，让观者感受到国王的浓厚氛围和突出魅力。\n"
+  },
+  "45": {
+    "title_en": "《Wendini in the Fountain》",
+    "title_zh": "《喷泉中的温迪尼》",
+    "description_en": "《Wendini in the Fountain》 is an exquisite marble sculpture created in 1880 by the 19th century American sculptor Chauncey Bradley Ives. The statue of Wendini rises from the water in an elegant and proud gesture, lifting her hands gently as if to greet the dawn, showing Ives's talent and creativity in the romantic style.\n",
+    "description_zh": "《喷泉中的温迪尼》是19世纪美国雕塑家昌西·布拉德利·艾夫斯于1880年创作的一件精美的大理石雕塑。温迪尼的雕像以优雅而骄傲的姿态从水中升起，轻轻举起双手，仿佛在迎接黎明，以浪漫的风格展示了艾夫斯的才华和创造力。\n"
+  },
+  "46": {
+    "title_en": "《Susanna》",
+    "title_zh": "《苏珊娜》",
+    "description_en": "《Susanna》 is the work of the American artist Giovanni Battista Lombardi in 1874. The sculpture of Susanna not only shows the soft beauty and purity of women, but also expresses her inner strength and courage. Susanna's face is beautiful and emotional, and her delicate muscular lines and slender fingers show Lombardi's precise grasp of the human body.\n",
+    "description_zh": "《苏珊娜》是美国艺术家乔瓦尼·巴蒂斯塔·隆巴迪在1874年的作品。苏珊娜的雕塑不仅展示了女性的柔美和纯洁，也表达了她内心的力量和勇气。苏珊娜的脸是美丽和情感的，她精致的肌肉线条和纤细的手指显示了伦巴第对人体的精确把握。\n"
+  },
+  "47": {
+    "title_en": "《The Faunal Being Teased by Children》",
+    "title_zh": "《被孩子们取笑的动物》",
+    "description_en": "《The Faunal Being Teased by Children》is a vibrant and humorous work by Italian Baroque sculptor GianLorenzo Benini. This marble sculpture was completed between 1616 and 1617. The sculpture depicts a joyous and vivid scene of a half-human, half-beast faun being teased by two naughty children. Benigni skillfully captures the humorous and dramatic side of this mythical figure.\n",
+    "description_zh": "《被孩子们取笑的动物》是意大利巴洛克雕塑家贝尼尼的一部充满活力和幽默的作品。这座大理石雕塑完成于1616年至1617年之间。这尊雕塑描绘了一个半人半兽的农牧之神被两个淘气的孩子戏弄的欢乐而生动的场景。贝尼尼巧妙地抓住了这个神话人物幽默和戏剧性的一面。\n"
+  },
+  "48": {
+    "title_en": "《Aeneid, Acasus and Ascanius》",
+    "title_zh": "《埃涅伊德、阿苏斯和阿斯卡尼乌斯》",
+    "description_en": "《Aeneid, Acasus and Ascanius》 is a sculpture created by Italian Baroque sculptor Bernini in 1618. Anchises clutched the sacred relic of Troy in his hands. Adding to the historical depth of the work, it also reinforces the religious significance of their escape. Young Ascanius followed his father, holding a small lamp, a symbol of hope and light for the future.\n",
+    "description_zh": "《埃涅伊德、阿苏斯和阿斯卡尼乌斯》是意大利巴洛克雕塑家贝尔尼尼于1618年创作的雕塑作品。安奇塞斯手里紧紧攥着特洛伊的圣物。增加了作品的历史深度，它也加强了他们逃离的宗教意义。小阿斯卡尼乌斯跟着父亲，手里拿着一盏小灯，象征着对未来的希望和光明。\n"
+  },
+  "49": {
+    "title_en": "《Eames lounge chair》",
+    "title_zh": "产品物品 49",
+    "description_en": "《Eames lounge chair》was designed by American couple Charles and Ray Eames in 1956. Their design philosophy emphasizes the combination of art and function to create furniture that is both beautiful and functional. The emergence of the Eames lounge chair marks the combination of innovation and luxury, becoming a model of modern furniture design.\n",
+    "description_zh": "《埃姆斯躺椅》是美国夫妇查尔斯和雷·埃姆斯于1956年设计的。他们的设计理念强调艺术与功能的结合，创造出既美观又实用的家具。Eames躺椅的出现标志着创新与奢华的结合，成为现代家具设计的典范。\n"
+  },
+  "50": {
+    "title_en": "《post-it notes》",
+    "title_zh": "《便利贴》",
+    "description_en": "In the late 1960s, American chemist Spencer Silver in his pursuit of super-strong adhesives, accidentally created a low-stick, reusable adhesive that would bind two surfaces together but tear easily, sparking the emergence of 《post-it notes》.\n",
+    "description_zh": "20世纪60年代末，美国化学家斯宾塞·西尔弗在追求超强粘合剂的过程中，偶然创造了一种低粘、可重复使用的粘合剂，这种粘合剂可以将两个表面粘合在一起，但很容易撕裂，引发了《便利贴》的出现。\n"
+  },
+  "51": {
+    "title_en": "《the alien juicer》",
+    "title_zh": "《异形榨汁机》",
+    "description_en": "In 1990, French designer Philippe Starck designed the alien juicer for Alessi. Its spiky lemon head, three long thin feet, and spider-like shape under the silver metal coat satisfied people's imagination of the alien. Although its function has been controversial, but \"forget that it is a juicer, It's a work of art.\"\n",
+    "description_zh": "1990年，法国设计师菲利普·斯塔克为阿莱西设计了异形榨汁机。它那尖尖的柠檬头，三条又长又细的脚，银色金属外衣下的蜘蛛形，满足了人们对外星人的想象。虽然它的功能一直备受争议，但“忘了它是一台榨汁机吧，它是一件艺术品。”\n"
+  },
+  "52": {
+    "title_en": "《The Red and Blue chair》",
+    "title_zh": "产品物品 52",
+    "description_en": "《The Red and Blue chair》 is one of the representative works of the Dutch style designer Gerrit Thomas Rietveld, which was first shown in 1923. It is famous for its bright red, yellow and blue squares, expressing the ideas of the \"Style school\" painter PietMondrian in three-dimensional form, which had a great influence on the Bauhaus.\n",
     "description_zh": ""
+  },
+  "53": {
+    "title_en": "《The CD player》",
+    "title_zh": "《CD播放机》",
+    "description_en": "The CD player was designed by Japanese designer Naoto Fukasawa, and its shape is very similar to a ventilation fan. When we see this CD player, our body will react accordingly. The music will play slowly like the wind. It reflects the designer's concept of \"without thought“ design.\n",
+    "description_zh": "这款CD播放机是由日本设计师深泽直人设计的，其外形与通风机非常相似。当我们看到这个CD播放机时，我们的身体会做出相应的反应。音乐会像风一样慢慢地演奏。它体现了设计师“不加思考”的设计理念。\n"
+  },
+  "54": {
+    "title_en": "《Barcelona Chair》",
+    "title_zh": "《巴塞罗那椅》",
+    "description_en": "The famous Barcelona Chair is a classic piece of modern furniture design, created by the German designer Mies van der Rohe. It consists of a curved, cross-shaped stainless steel frame supporting the leather pad, which is very beautiful and functional. Two rectangular leather pads form a sitting cushion and a backrest. \n",
+    "description_zh": "著名的巴塞罗那椅是现代家具设计的经典之作，由德国设计师密斯·凡德罗（Mies van der Rohe）创作。它由一个弯曲的、十字形的不锈钢框架支撑着皮革垫，非常美观和实用。两个矩形的皮革垫形成一个坐垫和靠背。\n"
+  },
+  "55": {
+    "title_en": "《LC4 lounge chair》",
+    "title_zh": "《LC4躺椅》",
+    "description_en": "《LC4 lounge chair》 is the 20th century French designer Le Corbusier's most classic furniture representative work, its design is full of interpretation of the concept of ergonomic, the whole lounge chair is S-shaped curve, the use of steel pipe and leather material. When you lie on it, every part of the body is effectively supported, it is the most comfortable chair.\n",
+    "description_zh": "《LC4躺椅》是20世纪法国设计师勒·柯布西耶最经典的家具代表作品，其设计充满了对人体工程学概念的诠释，整个躺椅呈s型曲线，采用了钢管和皮革材质。当你躺在上面时，身体的每一部分都得到了有效的支撑，它是最舒适的椅子。\n"
+  },
+  "56": {
+    "title_en": "《The Apple iPhone》",
+    "title_zh": "《苹果iPhone》",
+    "description_en": "《The Apple iPhone》 is designed and manufactured by Apple Inc., led by American designer Steve Jobs. Its use of advanced glass, metal and plastic materials, combined with elegant workmanship and simple design style, reflects Apple's always high quality and innovation.\n",
+    "description_zh": "《苹果iPhone》是由美国设计师史蒂夫·乔布斯领导的苹果公司设计和制造的。它采用先进的玻璃、金属和塑料材料，结合优雅的工艺和简单的设计风格，体现了苹果一贯的高品质和创新。\n"
+  },
+  "57": {
+    "title_en": "《The Volkswagen Beetle》",
+    "title_zh": "《大众甲壳虫》",
+    "description_en": "《The Volkswagen Beetle》 was originally designed by German engineer Ferdinand Porsche and introduced in 1938. Its rounded shape is made of steel, and its interior is made of comfortable cloth and leather, reflecting the craftsmanship and elegance of German design.\n",
+    "description_zh": "《大众甲壳虫》最初由德国工程师费迪南德·保时捷（Ferdinand Porsche）设计，于1938年推出。其圆润的外形采用钢材，内部采用舒适的布料和皮革，体现了德国设计的工艺和优雅。\n"
+  },
+  "58": {
+    "title_en": "《Madonna Litta》",
+    "title_zh": "《T型车》",
+    "description_en": "《Madonna Litta》is a religious painting created by Leonardo da Vinci in the late 15th century. It depicts an image of a lactating woman with an open window in the background, emphasizing the theme of motherhood and female beauty.\n",
+    "description_zh": "《T型车》由亨利·福特设计制造，车身主要由钢和木材制成。它被广泛认为是第一辆大规模生产的汽车，它以其简单、耐用的设计和负担得起的价格成为20世纪早期的象征。\n"
+  },
+  "59": {
+    "title_en": "《the Walkman》",
+    "title_zh": "《随身听》",
+    "description_en": "Designed by Japanese engineer Ohiro Ibuka, 《the Walkman》was first introduced using plastic and metal, and successive versions evolved to be lighter and smaller for portability. Its minimalist look and easy-to-use features have made it the world's most popular portable music player.\n",
+    "description_zh": "《随身听》由日本工程师井深大（Ohiro Ibuka）设计，最初推出时使用塑料和金属，后来的版本变得更轻、更小，以方便携带。它极简的外观和易于使用的功能使它成为世界上最受欢迎的便携式音乐播放器。\n"
+  },
+  "60": {
+    "title_en": "《Leica cameras》 ",
+    "title_zh": "《徕卡相机》",
+    "description_en": "《Leica cameras》 were designed by German designer Oscar Balter and were originally made of high-quality copper and silver-plated materials. Its unique mechanical structure and precise optical lens reflect the craftsmanship and delicate style of German manufacturing.\n",
+    "description_zh": "《徕卡相机》由德国设计师奥斯卡·巴尔特（Oscar Balter）设计，最初由高质量的铜和镀银材料制成。其独特的机械结构和精密的光学镜头体现了德国制造的工艺和精致风格。\n"
+  },
+  "61": {
+    "title_en": "《the Dyson vacuum cleaner》",
+    "title_zh": "《戴森真空吸尘器》",
+    "description_en": "Designed by British designer James Dyson, 《the Dyson vacuum cleaner》uses high-strength plastics and advanced cyclone technology. Its unique design not only improves the efficiency of vacuuming, but also changes the appearance and operation mode of traditional vacuum cleaners, becoming a model of modern home appliance design.\n",
+    "description_zh": "由英国设计师詹姆斯·戴森设计的《戴森真空吸尘器》使用高强度塑料和先进的旋风技术。其独特的设计不仅提高了吸尘效率，而且改变了传统吸尘器的外观和操作方式，成为现代家电设计的典范。\n"
+  },
+  "62": {
+    "title_en": "《The Verizon coffee machine》",
+    "title_zh": "《威瑞森咖啡机》",
+    "description_en": "《The Verizon coffee machine》is beautifully designed with high-quality metal and plastic materials. Its simple appearance and convenient operating system reflect the perfect combination of Swiss made exquisite technology and coffee culture.\n",
+    "description_zh": "《威瑞森咖啡机》设计精美，使用了高品质的金属和塑料材料。简洁的外观和便捷的操作系统，体现了瑞士制法的精湛工艺与咖啡文化的完美结合。\n"
+  },
+  "63": {
+    "title_en": "《The Tesla Model S》 ",
+    "title_zh": "《特斯拉Model S》",
+    "description_en": "《The Tesla Model S》 is designed and built by Tesla, led by American engineer Elon Musk. It uses advanced aluminum alloy and carbon fiber composite materials, which not only improves vehicle performance and safety, but also promotes the progress of electric vehicle technology.\n",
+    "description_zh": "《特斯拉Model S》是由美国工程师埃隆·马斯克（Elon Musk）领导的特斯拉设计和制造的。它采用了先进的铝合金和碳纤维复合材料，不仅提高了汽车性能和安全性，也促进了电动汽车技术的进步。\n"
+  },
+  "64": {
+    "title_en": "《the Nintendo Game Boy》",
+    "title_zh": "《任天堂游戏机》",
+    "description_en": "Designed by Japanese designer Neizo Yokoi, 《the Nintendo Game Boy》 uses durable plastic and electronics. Its classic design and easy-to-use button layout have made it a global favorite for kids and an important milestone in the history of gaming.\n",
+    "description_zh": "由日本设计师横井内三（Neizo Yokoi）设计的《任天堂游戏机》使用了耐用的塑料和电子产品。它的经典设计和易于使用的按钮布局使它成为全球儿童的最爱，也是游戏历史上的一个重要里程碑。\n"
+  },
+  "65": {
+    "title_en": "《the Rolex Submariner》",
+    "title_zh": "《劳力士潜水艇》",
+    "description_en": "Designed by Swiss designer Hans Wildorf, 《the Rolex Submariner》 is made of high-strength stainless steel and ceramic materials. Its classic diving watch design and reliable mechanical structure have become the first choice for diving enthusiasts and watch collectors.\n",
+    "description_zh": "由瑞士设计师汉斯·威尔多夫（Hans Wildorf）设计的《劳力士潜水艇》由高强度不锈钢和陶瓷材料制成。其经典的潜水表设计和可靠的机械结构成为潜水爱好者和手表收藏家的首选。\n"
+  },
+  "66": {
+    "title_en": "《The Braun SK4 Record Player》",
+    "title_zh": "《博朗SK4电唱机》",
+    "description_en": "《The Braun SK4 Record Player》was designed by German designer Dieter RAMS. Combining aluminum alloy and plastic, it was one of the most influential audio equipment of the 1950s, showing clear craftsmanship and simple appearance.\n",
+    "description_zh": "《博朗SK4电唱机》由德国设计师迪特尔·拉姆斯设计。它由铝合金与塑料的结合，是20世纪50年代最具影响力的音响设备之一，工艺清晰，外观简单。\n"
+  },
+  "67": {
+    "title_en": "《the Bang & Olufsen BeoSound 9000》",
+    "title_zh": "《铂傲9000 音响》",
+    "description_en": "Designed by Danish designer Jakobsen, 《the Bang & Olufsen BeoSound 9000》 is a modern sound system made of aluminium and glass, highlighting the elegance and functionality of Nordic design.\n",
+    "description_zh": "由丹麦设计师Jakobsen设计的《铂傲9000 音响》是一款由铝和玻璃制成的现代音响系统，突出了北欧设计的优雅和功能。\n"
+  },
+  "68": {
+    "title_en": "《The IBM Model M Keyboard》",
+    "title_zh": "《IBM M型键盘》",
+    "description_en": "《The IBM Model M Keyboard》, designed by IBM of the United States with durable plastic and mechanical switches, was one of the most popular computer keyboards of the 1980s, known for its reliability and comfort.\n",
+    "description_zh": "《IBM M型键盘》由美国IBM公司设计，采用耐用的塑料和机械开关，是20世纪80年代最受欢迎的电脑键盘之一，以可靠和舒适著称。\n"
+  },
+  "69": {
+    "title_en": "《The B&W Nautilus Speaker》",
+    "title_zh": "《B&W鹦鹉螺扬声器",
+    "description_en": "《The B&W Nautilus Speaker》 is designed by British company Bowers & Wilkins and finalized in 1993. Crafted from high-quality materials such as fiberglass-reinforced composite, aluminum, and fine acoustically tuned polymers. The Nautilus mimics the organic spiral of a seashell, showing avant-garde aesthetics.\n",
+    "description_zh": "《B&W鹦鹉螺扬声器》由英国鲍尔斯威尔金斯公司设计，于1993年定型。由玻璃纤维增强复合材料、铝和精细的声学调谐聚合物等高质量材料制作。鹦鹉螺模仿了贝壳的有机螺旋，展示了前卫的美学。\n"
+  },
+  "70": {
+    "title_en": "《The Harley-davidson Motorcycle》",
+    "title_zh": "《哈雷摩托车》",
+    "description_en": "《The Harley-davidson Motorcycle》 is Designed by American designers William S. Harley and Arthur Davidson, Harley-Davidson motorcycle is mainly made of steel and aluminum alloy materials. Its iconic heavy locomotive design and power performance have become a classic in the motorcycle industry.\n",
+    "description_zh": "《哈雷摩托车》是由美国设计师William S. Harley和Arthur Davidson设计的，Harley-Davidson摩托车主要采用钢和铝合金材料。其标志性的重型机车设计和动力性能已成为摩托车行业的经典。\n"
+  },
+  "71": {
+    "title_en": "《Marshall Amplifier》",
+    "title_zh": "《马歇尔扬声器》",
+    "description_en": "Designed by British designer Jim Marshall, 《Marshall Amplifier》 uses durable plastic and metal materials, and its unique musical performance style and symbolic status in rock culture make it an iconic product in the music industry.\n",
+    "description_zh": "《马歇尔扬声器》由英国设计师Jim Marshall设计，采用耐用的塑料和金属材料，其独特的音乐表演风格和在摇滚文化中的象征地位，使其成为音乐界的标志性产品。\n"
+  },
+  "72": {
+    "title_en": "《The Vespa Scooter》",
+    "title_zh": "《伟士牌摩托车》",
+    "description_en": "《The Vespa Scooter》 was designed by the Italian designer Coratto Damesi. It is mainly made of steel and plastic materials. Its simple and streamlined shape and the convenience of urban cycling make it a classic urban transportation tool.\n",
+    "description_zh": "《伟士牌摩托车》是由意大利设计师Coratto Damesi设计的。它主要由钢和塑料材料制成。它简洁流线型的外形和城市骑行的便捷性，使其成为经典的城市交通工具。\n"
   }
 }
