@@ -120,5 +120,9 @@
     "saveCustomization": "Save Customization",
     "saving": "Saving...",
     "customizationSuccess": "Customization saved successfully!",
-    "selectCardPrompt": "Please select a card from the list to customize its title and description."
+    "selectCardPrompt": "Please select a card from the list to customize its title and description.",
+    "useForAuction": "Use for Auction",
+    "itemSetForAuction": "Item {{itemId}} set for auction! Redirecting to auction screen...",
+    "setting": "Setting...",
+    "notification": "Notification"
 }

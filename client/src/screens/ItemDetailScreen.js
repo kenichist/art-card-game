@@ -63,21 +63,6 @@ const ItemDetailScreen = () => {
     // Return a formatted string with the translated type and the original item number
     return `${type} ${id}`;
   };
-  
-  // Helper function to provide detailed descriptions based on item type
-  const getItemTypeDescription = (itemId) => {
-    const id = Number(itemId);
-    
-    if (id >= 1 && id <= 24) {
-      return t('illustrationItemDescription');
-    } else if (id >= 25 && id <= 48) {
-      return t('sculptureItemDescription');
-    } else if (id >= 49 && id <= 72) {
-      return t('productItemDescription');
-    } else {
-      return t('unknownItemDescription');
-    }
-  };
 
   if (loading) return <h2>{t('loading')}</h2>;
   if (error) return <h3>{t('error', { message: error })}</h3>;
@@ -93,21 +78,14 @@ const ItemDetailScreen = () => {
         <Col md={6}>
           <Card>
             <Row>
-              <Col md={6}>
+              <Col md={12}>
                 <Card.Img 
                   variant="top" 
                   src={item.image} 
                   alt={item.name} 
                   className="item-detail-img" 
+                  style={{ width: '100%', height: 'auto', maxWidth: '606px', maxHeight: '405px', objectFit: 'contain' }}
                 />
-              </Col>
-              <Col md={6}>
-                <Card.Body>
-                  <Card.Title className="item-title">{item.name}</Card.Title>
-                  <Card.Text>
-                    {item.description || t('itemDescription')}
-                  </Card.Text>
-                </Card.Body>
               </Col>
             </Row>
           </Card>
@@ -127,7 +105,7 @@ const ItemDetailScreen = () => {
 
                 <ListGroup.Item>
                   <h4>{t('itemDescription')}</h4>
-                  <p>{getItemTypeDescription(item.id)}</p>
+                  <p>{item.description || t('noDescriptionAvailable')}</p>
                 </ListGroup.Item>
               </ListGroup>
 

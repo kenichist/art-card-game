@@ -160,6 +160,35 @@ export const updateAuction = async (auctionId, auctionData, lang = null) => {
 };
 
 /**
+ * Set an item as the active auction item
+ * @param {Number} itemId Item ID
+ * @param {String} lang Language code ('en' or 'zh')
+ * @returns {Promise<Object>} Promise resolving to created/updated auction
+ */
+export const setItemForAuction = async (itemId, lang = null) => {
+  try {
+    const langParam = lang ? `?lang=${lang}` : '';
+    const response = await fetch(
+      `${process.env.REACT_APP_API_URL}/api/auctions/create-with-item/${itemId}${langParam}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      }
+    );
+    if (!response.ok) {
+      throw new Error('Failed to set item for auction');
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error(`Error setting item ${itemId} for auction:`, error);
+    throw error;
+  }
+};
+
+/**
  * Update item customization (title and description)
  * @param {Number} itemId Item ID
  * @param {Object} customData Custom title and description data

@@ -51,6 +51,61 @@ const createAuction = async (req, res) => {
   }
 };
 
+// Create new auction with a specific item
+const createAuctionWithItem = async (req, res) => {
+  try {
+    const { itemId } = req.params;
+    // Get language preference from query parameter
+    const language = req.query.lang || 'en';
+    
+    console.log(`[DEBUG] createAuctionWithItem called with itemId: ${itemId}, language: ${language}`);
+    
+    // Convert to integer
+    const itemIdInt = parseInt(itemId);
+    
+    // Check if item exists
+    const item = getItemById(itemIdInt, language);
+    if (!item) {
+      return res.status(404).json({ message: 'Item not found' });
+    }
+    
+    // Look for any existing active auction
+    const existingAuction = auctions.find(a => a.status === 'active');
+    
+    if (existingAuction) {
+      // Update existing auction with new item
+      existingAuction.itemId = itemIdInt;
+      existingAuction.matchedDescriptions = [];
+      existingAuction.totalValue = 0;
+      existingAuction.collectorId = undefined; // Clear previous collector
+      existingAuction.updatedAt = new Date();
+      
+      console.log(`[DEBUG] Updated auction:`, existingAuction);
+      
+      res.json(existingAuction);
+    } else {
+      // Create new auction
+      const newAuction = {
+        _id: (currentAuctionId++).toString(),
+        itemId: itemIdInt,
+        status: 'active',
+        matchedDescriptions: [],
+        totalValue: 0,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      auctions.push(newAuction);
+      console.log(`[DEBUG] Created new auction:`, newAuction);
+      
+      res.json(newAuction);
+    }
+  } catch (error) {
+    console.error('Error in createAuctionWithItem:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // Update auction
 const updateAuction = async (req, res) => {
   try {
@@ -318,5 +373,6 @@ module.exports = {
   deleteAuction,
   matchItemWithCollector,
   getActiveAuction,
-  matchItems
+  matchItems,
+  createAuctionWithItem
 };

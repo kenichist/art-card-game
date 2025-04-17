@@ -312,15 +312,25 @@ const AuctionScreen = () => {
       </FadeInOnScroll>
 
       {currentItem ? (
-        <Row className="mb-5">
-          <Col md={6}>
+        <Row className="mb-5 justify-content-center">
+          <Col md={8} className="text-center">
             <FadeInOnScroll>
-              <Card>
+              <Card className="mx-auto" style={{ maxWidth: "550px" }}>
                 <Card.Img
                   variant="top"
                   src={currentItem?.image}
                   alt={currentItem?.name}
                   className="item-image"
+                  style={{ 
+                    width: "100%", 
+                    maxWidth: "1000px", 
+                    height: "auto", 
+                    maxHeight: "404px", 
+                    objectFit: "contain",
+                    margin: "0 auto",
+                    display: "block",
+                    padding: "15px"
+                  }}
                 />
                 <Card.Body>
                   <Card.Title>{currentItem?.name}</Card.Title>

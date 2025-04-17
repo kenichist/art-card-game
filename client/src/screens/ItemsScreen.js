@@ -1,18 +1,19 @@
 // --- START OF FILE ItemsScreen.js ---
 
-import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Button, Pagination, Form, InputGroup } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Container, Row, Col, Card, Button, Pagination, Form, InputGroup, Toast, ToastContainer } from 'react-bootstrap';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import FadeInOnScroll from '../components/FadeInOnScroll';
-import { getItems } from '../services/fileSystemService';
+import { getItems, setItemForAuction } from '../services/fileSystemService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faChevronLeft, faChevronRight, faGavel } from '@fortawesome/free-solid-svg-icons';
 import { useLanguage } from '../contexts/LanguageContext';
 
 const ItemsScreen = () => {
   const { t } = useTranslation();
   const { language } = useLanguage();
+  const navigate = useNavigate();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -20,6 +21,9 @@ const ItemsScreen = () => {
   const [itemsPerPage] = useState(12);
   const [searchTerm, setSearchTerm] = useState('');
   const [arrowHover, setArrowHover] = useState({ left: false, right: false });
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [selectedItemId, setSelectedItemId] = useState(null);
 
   // Helper function to determine item type from item ID
   const getItemType = (itemId) => {
@@ -92,6 +96,26 @@ const ItemsScreen = () => {
   // Arrow hover effect handlers
   const handleArrowHover = (direction, isHovering) => {
     setArrowHover(prev => ({...prev, [direction]: isHovering}));
+  };
+
+  // Handler function for setting an item for auction
+  const handleUseForAuction = async (itemId) => {
+    try {
+      setSelectedItemId(itemId);
+      const result = await setItemForAuction(itemId, language);
+      setToastMessage(t('itemSetForAuction', { itemId }));
+      setShowToast(true);
+      
+      // Navigate to auction screen after a short delay
+      setTimeout(() => {
+        navigate('/auction');
+      }, 1500);
+    } catch (error) {
+      setToastMessage(t('error', { message: error.message }));
+      setShowToast(true);
+    } finally {
+      setSelectedItemId(null);
+    }
   };
 
   if (loading) return <h2>{t('loading')}</h2>;
@@ -193,19 +217,32 @@ const ItemsScreen = () => {
                 <Col key={item.id} sm={12} md={6} lg={4} xl={3} className="mb-4">
                   <FadeInOnScroll>
                     <Card className="h-100 item-card">
-                      <Card.Img variant="top" src={item.image} alt={item.name} className="card-img" />
+                      <Card.Img 
+                        variant="top" 
+                        src={item.image} 
+                        alt={item.name} 
+                        className="card-img" 
+                        style={{ width: '100%', height: 'auto', maxWidth: '606px', maxHeight: '405px', objectFit: 'contain' }}
+                      />
                       <Card.Body>
                         <Card.Title>{item.name}</Card.Title>
-                        <Card.Text>
-                          {item.description || getItemType(item.id)}
-                        </Card.Text>
-                        <Button 
-                          as={Link} 
-                          to={`/items/${item.id}`} 
-                          variant="primary"
-                        >
-                          {t('viewDetails')}
-                        </Button>
+                        <div className="d-flex flex-column gap-2">
+                          <Button 
+                            as={Link} 
+                            to={`/items/${item.id}`} 
+                            variant="primary"
+                          >
+                            {t('viewDetails')}
+                          </Button>
+                          <Button 
+                            variant="secondary"
+                            onClick={() => handleUseForAuction(item.id)}
+                            disabled={selectedItemId === item.id}
+                          >
+                            <FontAwesomeIcon icon={faGavel} className="me-2" />
+                            {selectedItemId === item.id ? t('setting') : t('useForAuction')}
+                          </Button>
+                        </div>
                       </Card.Body>
                     </Card>
                   </FadeInOnScroll>
@@ -232,6 +269,22 @@ const ItemsScreen = () => {
           </Row>
         </>
       )}
+      
+      {/* Toast notification */}
+      <ToastContainer position="top-end" className="p-3" style={{ zIndex: 1050 }}>
+        <Toast 
+          show={showToast} 
+          onClose={() => setShowToast(false)} 
+          delay={3000} 
+          autohide
+          bg="success"
+        >
+          <Toast.Header>
+            <strong className="me-auto">{t('notification')}</strong>
+          </Toast.Header>
+          <Toast.Body className="text-white">{toastMessage}</Toast.Body>
+        </Toast>
+      </ToastContainer>
     </Container>
   );
 };
