@@ -5,6 +5,7 @@ import { Container, Row, Col, Card, Button, Form, Alert, ListGroup, Modal } from
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import FadeInOnScroll from '../components/FadeInOnScroll';
+import DealingCardAnimation from '../components/DealingCardAnimation';
 import { useLanguage } from '../contexts/LanguageContext';
 import { 
   getActiveAuction, 
@@ -357,38 +358,14 @@ const AuctionScreen = () => {
       </FadeInOnScroll>
 
       <Row>
-        {userCollections.map(collector => (
+        {userCollections.map((collector, index) => (
           <Col key={collector._id} sm={12} md={6} lg={4} className="mb-4">
-            <FadeInOnScroll>
-              <Card className="h-100">
-                <Card.Img
-                  variant="top"
-                  src={collector.image}
-                  alt={collector.name}
-                  style={{ height: '200px', objectFit: 'contain' }}
-                />
-                <Card.Body>
-                  <Card.Title>{collector.name}</Card.Title>
-                  {collector.descriptions && (
-                    <ListGroup variant="flush">
-                      {collector.descriptions.map((desc, index) => (
-                        <ListGroup.Item key={index}>
-                          <strong>{desc.attribute}:</strong> {desc.value}
-                        </ListGroup.Item>
-                      ))}
-                    </ListGroup>
-                  )}
-                  <Button
-                    variant="primary"
-                    className="mt-3"
-                    onClick={() => handleBid(collector.id)}
-                    disabled={!currentItem}
-                  >
-                    {t('placeBid')}
-                  </Button>
-                </Card.Body>
-              </Card>
-            </FadeInOnScroll>
+            <DealingCardAnimation 
+              collector={collector}
+              onBidClick={handleBid}
+              disabled={!currentItem}
+              index={index}
+            />
           </Col>
         ))}
       </Row>
