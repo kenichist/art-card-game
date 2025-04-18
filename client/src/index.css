@@ -81,6 +81,17 @@ body {
     margin: 0.25rem;
   }
 
+  /* Hide custom fixed pagination arrows on mobile */
+  .pagination-arrow {
+    display: none !important;
+  }
+
+  /* Ensure standard pagination is centered and usable */
+  .pagination {
+    justify-content: center;
+    margin-top: 1.5rem; /* Add some space above pagination */
+  }
+
   /* Adjust card layouts in grid */
   .row {
     margin: 0;
@@ -837,15 +848,7 @@ html {
   background-size: cover;
   background-position: center;
   border-bottom: 4px solid #EDB65B;
-}
-
-.banner-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(rgba(2,2,2,0.5), rgba(2,2,2,0.7));
+  /* Added flex display to center the title directly */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -857,6 +860,10 @@ html {
   font-size: 3.5rem;
   text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
   letter-spacing: 2px;
+  /* Added background for better readability without overlay */
+  background-color: rgba(2, 2, 2, 0.6);
+  padding: 0.5rem 1.5rem;
+  border-radius: 8px;
 }
 
 .fantasy-navbar {
@@ -918,6 +925,115 @@ html {
   background-color: #EDB65B !important;
   border-color: #EDB65B !important;
   color: #020202 !important;
+}
+
+/* Fantasy Cards Grid Layout */
+.fantasy-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  width: 100%;
+  position: relative;
+  margin-bottom: 2rem;
+}
+
+/* Grid responsive breakpoints */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .fantasy-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .fantasy-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Ensure cards in the grid fill their container */
+.fantasy-grid .card {
+  height: 100%;
+  margin-bottom: 0; /* Override existing margin to avoid extra spacing */
+}
+
+/* Fix for FadeInOnScroll inside grid */
+.fantasy-grid > div {
+  display: contents;
+}
+
+/* View Mode Toggle Styles */
+.view-mode-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin: 1rem 0;
+}
+
+.toggle-label {
+  font-family: 'Cinzel', serif;
+  color: #EDB65B;
+  margin-right: 0.5rem;
+}
+
+/* Grid size classes for ViewModeToggle */
+.fantasy-grid.size-small {
+  grid-template-columns: repeat(6, 1fr);
+}
+
+.fantasy-grid.size-medium {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.fantasy-grid.size-large {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* Responsive adjustments for the grid sizes */
+@media (max-width: 1200px) {
+  .fantasy-grid.size-small {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .fantasy-grid.size-medium {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .fantasy-grid.size-large {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 992px) {
+  .fantasy-grid.size-small {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .fantasy-grid.size-medium {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .fantasy-grid.size-large {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .fantasy-grid.size-small,
+  .fantasy-grid.size-medium {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .fantasy-grid.size-large {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .fantasy-grid.size-small,
+  .fantasy-grid.size-medium,
+  .fantasy-grid.size-large {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Keep any existing navbar/header styles below */

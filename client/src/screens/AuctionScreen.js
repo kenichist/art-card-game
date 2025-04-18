@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Container, Row, Col, Card, Button, Form, Alert, ListGroup, Modal } from 'react-bootstrap';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import gsap from 'gsap';
 import FadeInOnScroll from '../components/FadeInOnScroll';
 import DealingCardAnimation from '../components/DealingCardAnimation';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -22,6 +23,10 @@ const AuctionScreen = () => {
   const matchSoundRef = useRef(null);
   const successSoundRef = useRef(null);
   const particleContainerRef = useRef(null);
+  const cardRef = useRef(null);
+  const lastTapTimeRef = useRef(0);
+  const isExpandedRef = useRef(false);
+  const isTouchDeviceRef = useRef(false);
 
   const [activeAuction, setActiveAuction] = useState(null);
   const [currentItem, setCurrentItem] = useState(null);
@@ -31,6 +36,17 @@ const AuctionScreen = () => {
   const [matchResults, setMatchResults] = useState(null);
   const [showMatchModal, setShowMatchModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+  useEffect(() => {
+    // Check if this is a touch device
+    const detectTouchDevice = () => {
+      isTouchDeviceRef.current = ('ontouchstart' in window) || 
+        (navigator.maxTouchPoints > 0) || 
+        (navigator.msMaxTouchPoints > 0);
+    };
+    
+    detectTouchDevice();
+  }, []);
 
   useEffect(() => {
     // Create audio elements with error handling
@@ -59,6 +75,83 @@ const AuctionScreen = () => {
       }
     };
   }, []);
+
+  // Set up hover and touch effects
+  useEffect(() => {
+    if (!cardRef.current) return;
+    
+    // GSAP hover effects for desktop
+    const hoverEffect = (e) => {
+      if (isTouchDeviceRef.current) return; // Skip on touch devices
+      
+      gsap.to(e.currentTarget, {
+        scale: 1.05,
+        boxShadow: '0 10px 20px rgba(255, 215, 0, 0.3)',
+        duration: 0.3,
+        ease: 'power2.out'
+      });
+    };
+    
+    const leaveEffect = (e) => {
+      if (isTouchDeviceRef.current) return; // Skip on touch devices
+      
+      gsap.to(e.currentTarget, {
+        scale: 1,
+        boxShadow: '0 5px 10px rgba(0, 0, 0, 0.2)',
+        duration: 0.3,
+        ease: 'power2.out'
+      });
+    };
+    
+    // Double-tap functionality for touch devices
+    const handleTap = (e) => {
+      if (!isTouchDeviceRef.current) return; // Only for touch devices
+      
+      const currentTime = new Date().getTime();
+      const tapLength = currentTime - lastTapTimeRef.current;
+      
+      if (tapLength < 300 && tapLength > 0) {
+        // Double tap detected
+        e.preventDefault();
+        
+        if (isExpandedRef.current) {
+          // Collapse
+          gsap.to(e.currentTarget, {
+            scale: 1,
+            boxShadow: '0 5px 10px rgba(0, 0, 0, 0.2)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+          isExpandedRef.current = false;
+        } else {
+          // Expand
+          gsap.to(e.currentTarget, {
+            scale: 1.1,
+            boxShadow: '0 15px 30px rgba(255, 215, 0, 0.4)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+          isExpandedRef.current = true;
+        }
+      }
+      
+      lastTapTimeRef.current = currentTime;
+    };
+    
+    // Add event listeners to the card
+    const card = cardRef.current;
+    
+    card.addEventListener('mouseenter', hoverEffect);
+    card.addEventListener('mouseleave', leaveEffect);
+    card.addEventListener('touchstart', handleTap);
+    
+    return () => {
+      // Clean up event listeners
+      card.removeEventListener('mouseenter', hoverEffect);
+      card.removeEventListener('mouseleave', leaveEffect);
+      card.removeEventListener('touchstart', handleTap);
+    };
+  }, [currentItem]); // Re-run when currentItem changes
 
   useEffect(() => {
     const fetchData = async () => {
@@ -316,7 +409,7 @@ const AuctionScreen = () => {
         <Row className="mb-5 justify-content-center">
           <Col md={8} className="text-center">
             <FadeInOnScroll>
-              <Card className="mx-auto" style={{ maxWidth: "550px" }}>
+              <Card className="mx-auto" style={{ maxWidth: "550px" }} ref={cardRef}>
                 <Card.Img
                   variant="top"
                   src={currentItem?.image}

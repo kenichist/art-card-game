@@ -1,14 +1,20 @@
 // --- START OF FILE ItemsScreen.js ---
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { Container, Row, Col, Card, Button, Pagination, Form, InputGroup, Toast, ToastContainer } from 'react-bootstrap';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Container, Card, Button, Pagination, Form, InputGroup, Toast, ToastContainer, Row, Col } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import FadeInOnScroll from '../components/FadeInOnScroll';
+import ViewModeToggle from '../components/ViewModeToggle';
 import { getItems, setItemForAuction } from '../services/fileSystemService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faChevronLeft, faChevronRight, faGavel } from '@fortawesome/free-solid-svg-icons';
 import { useLanguage } from '../contexts/LanguageContext';
+import { Flip } from 'gsap/Flip';
+import gsap from 'gsap';
+
+// Register GSAP Flip plugin
+gsap.registerPlugin(Flip);
 
 const ItemsScreen = () => {
   const { t } = useTranslation();
@@ -24,6 +30,13 @@ const ItemsScreen = () => {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [selectedItemId, setSelectedItemId] = useState(null);
+  const [viewMode, setViewMode] = useState('medium');
+  
+  // Refs for GSAP animations and touch support
+  const itemCardsRef = useRef([]);
+  const lastTapTimeRef = useRef({});
+  const isExpandedRef = useRef({});
+  const isTouchDeviceRef = useRef(false);
 
   // Helper function to determine item type from item ID
   const getItemType = (itemId) => {
@@ -40,6 +53,23 @@ const ItemsScreen = () => {
       return t('unknownItem');
     }
   };
+
+  // Filter items based on search term
+  const filteredItems = items.filter(item => 
+    item.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    getItemType(item.id).toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredItems.slice(indexOfFirstItem, indexOfLastItem);
+  
+  // Detect touch device
+  useEffect(() => {
+    isTouchDeviceRef.current = ('ontouchstart' in window) || 
+      (navigator.maxTouchPoints > 0) || 
+      (navigator.msMaxTouchPoints > 0);
+  }, []);
 
   useEffect(() => {
     const fetchItems = async () => {
@@ -58,17 +88,123 @@ const ItemsScreen = () => {
     };
     fetchItems();
   }, [language]); // Re-fetch when language changes
-
-  // Filter items based on search term
-  const filteredItems = items.filter(item => 
-    item.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    getItemType(item.id).toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredItems.slice(indexOfFirstItem, indexOfLastItem);
   
+  // Set up GSAP hover effects for desktop and double-tap for touch devices
+  useEffect(() => {
+    // Reset the refs when items change
+    itemCardsRef.current = [];
+    
+    // Set up GSAP effects after a short delay to ensure DOM is ready
+    const timer = setTimeout(() => {
+      setupCardEffects();
+    }, 100);
+    
+    return () => {
+      clearTimeout(timer);
+      // Clean up any lingering event listeners
+      cleanupCardEffects();
+    };
+  }, [currentPage, itemsPerPage, searchTerm, items]); // Dependencies that affect what's displayed
+
+  const setupCardEffects = () => {
+    // Function to apply effects to a single card
+    const applyCardEffects = (cardRef, cardId) => {
+      if (!cardRef) return null;
+      
+      const cardKey = `item-${cardId}`;
+      if (isExpandedRef.current[cardKey] === undefined) {
+        isExpandedRef.current[cardKey] = false;
+      }
+      
+      // GSAP hover effects for desktop
+      const hoverEffect = (e) => {
+        if (isTouchDeviceRef.current) return; // Skip on touch devices
+        
+        gsap.to(e.currentTarget, {
+          scale: 1.05,
+          boxShadow: '0 15px 30px rgba(255, 215, 0, 0.3)',
+          duration: 0.3,
+          ease: 'power2.out'
+        });
+      };
+      
+      const leaveEffect = (e) => {
+        if (isTouchDeviceRef.current) return; // Skip on touch devices
+        
+        gsap.to(e.currentTarget, {
+          scale: 1,
+          boxShadow: '0 5px 10px rgba(0, 0, 0, 0.2)',
+          duration: 0.3,
+          ease: 'power2.out'
+        });
+      };
+      
+      // Double-tap functionality for touch devices
+      const handleTap = (e) => {
+        if (!isTouchDeviceRef.current) return; // Only for touch devices
+        
+        const currentTime = new Date().getTime();
+        const tapLength = currentTime - (lastTapTimeRef.current[cardKey] || 0);
+        
+        if (tapLength < 300 && tapLength > 0) {
+          // Double tap detected
+          e.preventDefault();
+          
+          if (isExpandedRef.current[cardKey]) {
+            // Collapse
+            gsap.to(e.currentTarget, {
+              scale: 1,
+              boxShadow: '0 5px 10px rgba(0, 0, 0, 0.2)',
+              duration: 0.3,
+              ease: 'power2.out'
+            });
+            isExpandedRef.current[cardKey] = false;
+          } else {
+            // Expand
+            gsap.to(e.currentTarget, {
+              scale: 1.1,
+              boxShadow: '0 15px 30px rgba(255, 215, 0, 0.4)',
+              duration: 0.3,
+              ease: 'power2.out'
+            });
+            isExpandedRef.current[cardKey] = true;
+          }
+        }
+        
+        lastTapTimeRef.current[cardKey] = currentTime;
+      };
+      
+      // Add event listeners
+      cardRef.addEventListener('mouseenter', hoverEffect);
+      cardRef.addEventListener('mouseleave', leaveEffect);
+      cardRef.addEventListener('touchstart', handleTap);
+      
+      // Return cleanup function
+      return () => {
+        cardRef.removeEventListener('mouseenter', hoverEffect);
+        cardRef.removeEventListener('mouseleave', leaveEffect);
+        cardRef.removeEventListener('touchstart', handleTap);
+      };
+    };
+    
+    // Apply effects to all current item cards
+    const cleanupFunctions = itemCardsRef.current.map((card, index) => {
+      const item = currentItems[index];
+      if (!item || !card) return null;
+      return applyCardEffects(card, item.id);
+    });
+    
+    // Store cleanup functions
+    return () => {
+      cleanupFunctions.forEach(cleanup => cleanup && cleanup());
+    };
+  };
+  
+  const cleanupCardEffects = () => {
+    // This function will be called on component unmount or when currentItems changes
+    // Any cleanup that needs to happen can go here
+  };
+
   const paginate = (pageNumber) => {
     setCurrentPage(pageNumber);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -150,6 +286,17 @@ const ItemsScreen = () => {
         </div>
       ) : (
         <>
+          {/* View Mode Toggle */}
+          <Row className="mb-3">
+            <Col className="d-flex justify-content-end">
+              <ViewModeToggle 
+                initialMode={viewMode}
+                onViewModeChange={(mode) => setViewMode(mode)}
+                containerSelector=".fantasy-grid"
+              />
+            </Col>
+          </Row>
+          
           {/* Side Navigation Arrows */}
           <div style={{ position: 'relative' }}>
             {/* Left Arrow */}
@@ -212,43 +359,45 @@ const ItemsScreen = () => {
               <FontAwesomeIcon icon={faChevronRight} size="lg" className="fade-in-up" />
             </div>
             
-            <Row>
-              {currentItems.map(item => (
-                <Col key={item.id} sm={12} md={6} lg={4} xl={3} className="mb-4">
-                  <FadeInOnScroll>
-                    <Card className="h-100 item-card">
-                      <Card.Img 
-                        variant="top" 
-                        src={item.image} 
-                        alt={item.name} 
-                        className="card-img" 
-                        style={{ width: '100%', height: 'auto', maxWidth: '606px', maxHeight: '405px', objectFit: 'contain' }}
-                      />
-                      <Card.Body>
-                        <Card.Title>{item.name}</Card.Title>
-                        <div className="d-flex flex-column gap-2">
-                          <Button 
-                            as={Link} 
-                            to={`/items/${item.id}`} 
-                            variant="primary"
-                          >
-                            {t('viewDetails')}
-                          </Button>
-                          <Button 
-                            variant="secondary"
-                            onClick={() => handleUseForAuction(item.id)}
-                            disabled={selectedItemId === item.id}
-                          >
-                            <FontAwesomeIcon icon={faGavel} className="me-2" />
-                            {selectedItemId === item.id ? t('setting') : t('useForAuction')}
-                          </Button>
-                        </div>
-                      </Card.Body>
-                    </Card>
-                  </FadeInOnScroll>
-                </Col>
+            {/* CSS Grid Layout for Items */}
+            <div className="fantasy-grid">
+              {currentItems.map((item, index) => (
+                <FadeInOnScroll key={item.id}>
+                  <Card 
+                    className="h-100 item-card"
+                    ref={el => itemCardsRef.current[index] = el}
+                  >
+                    <Card.Img 
+                      variant="top" 
+                      src={item.image} 
+                      alt={item.name} 
+                      className="card-img" 
+                      style={{ width: '100%', height: 'auto', maxWidth: '606px', maxHeight: '405px', objectFit: 'contain' }}
+                    />
+                    <Card.Body>
+                      <Card.Title>{item.name}</Card.Title>
+                      <div className="d-flex flex-column gap-2">
+                        <Button 
+                          as={Link} 
+                          to={`/items/${item.id}`} 
+                          variant="primary"
+                        >
+                          {t('viewDetails')}
+                        </Button>
+                        <Button 
+                          variant="secondary"
+                          onClick={() => handleUseForAuction(item.id)}
+                          disabled={selectedItemId === item.id}
+                        >
+                          <FontAwesomeIcon icon={faGavel} className="me-2" />
+                          {selectedItemId === item.id ? t('setting') : t('useForAuction')}
+                        </Button>
+                      </div>
+                    </Card.Body>
+                  </Card>
+                </FadeInOnScroll>
               ))}
-            </Row>
+            </div>
           </div>
 
           {/* Pagination */}
