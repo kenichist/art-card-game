@@ -3,13 +3,19 @@
 
 // Helper function to get the base API URL
 const getApiBaseUrl = () => {
-  // In production (like Vercel), use relative URLs or the actual domain
-  if (process.env.NODE_ENV === 'production') {
-    // For Vercel deployment, use relative URLs (API routes will be handled by Vercel)
-    return '';  // Return empty string so we just use '/api/...' directly
+  // Check if we're in production by examining the hostname
+  // This works in both the browser and during SSR
+  const isProduction = typeof window !== 'undefined' && 
+    (window.location.hostname !== 'localhost' && 
+     !window.location.hostname.includes('127.0.0.1'));
+  
+  if (isProduction) {
+    // In production (Vercel, etc.), use the same origin
+    return '';
   }
+  
   // For local development
-  return process.env.REACT_APP_API_URL || '';
+  return process.env.REACT_APP_API_URL || 'http://localhost:5000';
 };
 
 /**

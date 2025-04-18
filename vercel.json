@@ -3,59 +3,40 @@
     "builds": [
       {
         "src": "server/server.js",
-        "use": "@vercel/node"     
+        "use": "@vercel/node"
       },
       {
-        "src": "client/package.json", 
-        "use": "@vercel/static-build", 
+        "src": "client/package.json",
+        "use": "@vercel/static-build",
         "config": {
-          "distDir": "build" 
+          "distDir": "build",
+          "buildCommand": "npm run build"
         }
       }
     ],
     "routes": [
       {
         "src": "/api/(.*)",
-        "dest": "/server/server.js"
-      },
-      {
-        "src": "/static/(.*)",
-        "dest": "/client/build/static/$1"
-      },
-      {
-        "src": "/images/(.*)",
-        "dest": "/client/build/images/$1"
-      },
-      {
-        "src": "/locales/(.*)",
-        "dest": "/client/build/locales/$1"
-      },
-      {
-        "src": "/background/(.*)",
-        "dest": "/client/build/background/$1"
-      },
-      {
-        "src": "/sounds/(.*)",
-        "dest": "/client/build/sounds/$1"
-      },
-      {
-        "src": "/favicon.ico",
-        "dest": "/client/build/favicon.ico"
-      },
-      {
-        "src": "/manifest.json",
-        "dest": "/client/build/manifest.json"
-      },
-      {
-        "src": "/asset-manifest.json",
-        "dest": "/client/build/asset-manifest.json"
+        "dest": "server/server.js"
       },
       {
         "handle": "filesystem"
       },
       {
-        "src": "/(.*)",           
-        "dest": "/client/build/index.html"
+        "src": "/static/(.*)",
+        "dest": "client/build/static/$1"
+      },
+      {
+        "src": "/(images|locales|sounds|background)/(.*)",
+        "dest": "client/build/$1/$2"
+      },
+      {
+        "src": "/(manifest\\.json|favicon\\.ico|asset-manifest\\.json|robots\\.txt)",
+        "dest": "client/build/$1"
+      },
+      {
+        "src": "/(.*)",
+        "dest": "client/build/index.html"
       }
     ]
   }

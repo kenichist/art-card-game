@@ -11,8 +11,14 @@ const { ensurePublicDirectories } = require('./services/fileSystemService');
 // Load environment variables
 dotenv.config(); 
 
-// Connect to database (Ensure DATABASE_URL env var is set in Vercel)
-connectDB();
+// Connect to database (ensure MongoDB connection is properly configured in Vercel)
+if (process.env.NODE_ENV === 'production') {
+  // Only try to connect if not in a serverless environment
+  // or use a connection pooling solution for serverless
+  connectDB().catch(err => console.error('Database connection error:', err));
+} else {
+  connectDB();
+}
 
 const app = express();
 
@@ -22,12 +28,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // --- Static File Serving (from server/public directory) ---
-// IMPORTANT: Do NOT rely on saving user uploads here in Vercel's serverless environment. Use external storage.
+// IMPORTANT: In Vercel, static assets should be served through Vercel's CDN
 app.use('/images', express.static(path.join(__dirname, 'public/images')));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Initialize file system directories and copy images
-ensurePublicDirectories();
+// Initialize file system directories in development only
+if (process.env.NODE_ENV !== 'production') {
+  ensurePublicDirectories();
+}
 
 // Import routes
 const itemRoutes = require('./routes/itemRoutes');
@@ -35,25 +43,18 @@ const collectorRoutes = require('./routes/collectorRoutes');
 const auctionRoutes = require('./routes/auctionRoutes');
 const seedRoutes = require('./routes/seedRoutes');
 
+// API routes
 app.use('/api/items', itemRoutes);
 app.use('/api/collectors', collectorRoutes);
 app.use('/api/auctions', auctionRoutes);
 app.use('/api/seed', seedRoutes);
 
-// Serve static files from the React app in production
-if (process.env.NODE_ENV === 'production') {
-  const clientBuildPath = path.join(__dirname, '../client/build');
-  console.log(`Serving static files from: ${clientBuildPath}`);
-  
-  // Serve static files
-  app.use(express.static(clientBuildPath));
-  
-  // Handle React routing, return all requests to React app
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(clientBuildPath, 'index.html'));
-  });
-}
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'ok', environment: process.env.NODE_ENV });
+});
 
+// Error handling middleware
 app.use((err, req, res, next) => {
     console.error("Error Handler Caught:", err.message);
 
