@@ -120,7 +120,7 @@ const CollectorsScreen = () => {
       // Clean up any lingering event listeners
       cleanupCardEffects();
     };
-  }, [currentPage, collectorsPerPage, searchTerm, collectors]); // Dependencies that affect what's displayed
+  }, [currentPage, collectorsPerPage, searchTerm, collectors, setupCardEffects]); // Added setupCardEffects dependency
 
   const setupCardEffects = () => {
     // Function to apply effects to a single card

@@ -19,13 +19,17 @@ const FadeInOnScroll = ({ children }) => {
       }
     );
 
-    if (elementRef.current) {
-      observer.observe(elementRef.current);
+    // Store current ref value in a variable
+    const current = elementRef.current;
+
+    if (current) {
+      observer.observe(current);
     }
 
     return () => {
-      if (elementRef.current) {
-        observer.unobserve(elementRef.current);
+      // Use the stored variable in cleanup
+      if (current) {
+        observer.unobserve(current);
       }
     };
   }, []);

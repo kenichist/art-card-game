@@ -64,13 +64,17 @@ const DealingCardAnimation = ({ collector, onBidClick, disabled, index }) => {
       }
     );
 
-    if (cardRef.current) {
-      observer.observe(cardRef.current);
+    // Store current ref value in a variable
+    const currentCard = cardRef.current;
+
+    if (currentCard) {
+      observer.observe(currentCard);
     }
 
     return () => {
-      if (cardRef.current) {
-        observer.unobserve(cardRef.current);
+      // Use the stored variable in cleanup
+      if (currentCard) {
+        observer.unobserve(currentCard);
       }
     };
   }, []);

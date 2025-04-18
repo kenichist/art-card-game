@@ -1,8 +1,7 @@
 // --- START OF FILE AuctionScreen.js ---
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Container, Row, Col, Card, Button, Form, Alert, ListGroup, Modal } from 'react-bootstrap';
-import { useLocation } from 'react-router-dom';
+import { Container, Row, Col, Card, Button, Alert, ListGroup, Modal } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import gsap from 'gsap';
 import FadeInOnScroll from '../components/FadeInOnScroll';
@@ -19,7 +18,6 @@ import {
 const AuctionScreen = () => {
   const { t } = useTranslation();
   const { language } = useLanguage();
-  const location = useLocation();
   const matchSoundRef = useRef(null);
   const successSoundRef = useRef(null);
   const particleContainerRef = useRef(null);
@@ -191,7 +189,6 @@ const AuctionScreen = () => {
       
       // Random position and animation
       const angle = Math.random() * Math.PI * 2;
-      const velocity = 2 + Math.random() * 2;
       const size = 5 + Math.random() * 5;
       
       particle.style.width = `${size}px`;

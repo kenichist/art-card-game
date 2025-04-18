@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Container, Row, Col, Card, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+// Removed unused axios import
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../contexts/LanguageContext';
 import FadeInOnScroll from '../components/FadeInOnScroll';

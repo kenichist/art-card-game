@@ -1,6 +1,6 @@
 // --- START OF FILE ItemsScreen.js ---
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Container, Card, Button, Pagination, Form, InputGroup, Toast, ToastContainer, Row, Col } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -104,9 +104,9 @@ const ItemsScreen = () => {
       // Clean up any lingering event listeners
       cleanupCardEffects();
     };
-  }, [currentPage, itemsPerPage, searchTerm, items]); // Dependencies that affect what's displayed
+  }, [currentPage, itemsPerPage, searchTerm, items, setupCardEffects]); // Added setupCardEffects dependency
 
-  const setupCardEffects = () => {
+  const setupCardEffects = useCallback(() => {
     // Function to apply effects to a single card
     const applyCardEffects = (cardRef, cardId) => {
       if (!cardRef) return null;
@@ -198,12 +198,12 @@ const ItemsScreen = () => {
     return () => {
       cleanupFunctions.forEach(cleanup => cleanup && cleanup());
     };
-  };
+  }, [currentItems]); // Added dependencies for useCallback
   
-  const cleanupCardEffects = () => {
+  const cleanupCardEffects = useCallback(() => {
     // This function will be called on component unmount or when currentItems changes
     // Any cleanup that needs to happen can go here
-  };
+  }, []);
 
   const paginate = (pageNumber) => {
     setCurrentPage(pageNumber);
@@ -238,7 +238,7 @@ const ItemsScreen = () => {
   const handleUseForAuction = async (itemId) => {
     try {
       setSelectedItemId(itemId);
-      const result = await setItemForAuction(itemId, language);
+      await setItemForAuction(itemId, language);
       setToastMessage(t('itemSetForAuction', { itemId }));
       setShowToast(true);
       

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Form, Nav, Alert, Tabs, Tab } from 'react-bootstrap';
-import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../contexts/LanguageContext';
 import { 
   getItems, 
@@ -11,7 +10,6 @@ import {
 import FadeInOnScroll from '../components/FadeInOnScroll';
 
 const CustomizationScreen = () => {
-  const { t } = useTranslation();
   const { language } = useLanguage();
 
   const [activeTab, setActiveTab] = useState('items');
