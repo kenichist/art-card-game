@@ -1,6 +1,11 @@
 // File system service for client-side
 // This service handles loading collector and item data directly from the server API
 
+// Helper function to get the base API URL
+const getApiBaseUrl = () => {
+  return process.env.REACT_APP_API_URL || ''; // Use empty string if not defined
+};
+
 /**
  * Get all collectors from the filesystem
  * @param {String} lang Language code ('en' or 'zh')
@@ -9,7 +14,8 @@
 export const getCollectors = async (lang = null) => {
   try {
     const langParam = lang ? `?lang=${lang}` : '';
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/api/collectors${langParam}`);
+    const baseUrl = getApiBaseUrl();
+    const response = await fetch(`${baseUrl}/api/collectors${langParam}`);
     if (!response.ok) {
       throw new Error('Failed to fetch collectors');
     }
@@ -30,7 +36,8 @@ export const getCollectors = async (lang = null) => {
 export const getCollectorById = async (id, lang = null) => {
   try {
     const langParam = lang ? `?lang=${lang}` : '';
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/api/collectors/${id}${langParam}`);
+    const baseUrl = getApiBaseUrl();
+    const response = await fetch(`${baseUrl}/api/collectors/${id}${langParam}`);
     if (!response.ok) {
       throw new Error('Failed to fetch collector');
     }
@@ -50,7 +57,8 @@ export const getCollectorById = async (id, lang = null) => {
 export const getItems = async (lang = null) => {
   try {
     const langParam = lang ? `?lang=${lang}` : '';
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/api/items${langParam}`);
+    const baseUrl = getApiBaseUrl();
+    const response = await fetch(`${baseUrl}/api/items${langParam}`);
     if (!response.ok) {
       throw new Error('Failed to fetch items');
     }
@@ -71,7 +79,8 @@ export const getItems = async (lang = null) => {
 export const getItemById = async (id, lang = null) => {
   try {
     const langParam = lang ? `?lang=${lang}` : '';
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/api/items/${id}${langParam}`);
+    const baseUrl = getApiBaseUrl();
+    const response = await fetch(`${baseUrl}/api/items/${id}${langParam}`);
     if (!response.ok) {
       throw new Error('Failed to fetch item');
     }
@@ -93,8 +102,9 @@ export const getItemById = async (id, lang = null) => {
 export const matchItemWithCollector = async (itemId, collectorId, lang = null) => {
   try {
     const langParam = lang ? `?lang=${lang}` : '';
+    const baseUrl = getApiBaseUrl();
     const response = await fetch(
-      `${process.env.REACT_APP_API_URL}/api/auctions/match/${itemId}/${collectorId}${langParam}`, 
+      `${baseUrl}/api/auctions/match/${itemId}/${collectorId}${langParam}`, 
       { method: 'POST' }
     );
     if (!response.ok) {
@@ -116,7 +126,8 @@ export const matchItemWithCollector = async (itemId, collectorId, lang = null) =
 export const getActiveAuction = async (lang = null) => {
   try {
     const langParam = lang ? `?lang=${lang}` : '';
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auctions/active${langParam}`);
+    const baseUrl = getApiBaseUrl();
+    const response = await fetch(`${baseUrl}/api/auctions/active${langParam}`);
     if (!response.ok) {
       throw new Error('Failed to fetch active auction');
     }
@@ -138,8 +149,9 @@ export const getActiveAuction = async (lang = null) => {
 export const updateAuction = async (auctionId, auctionData, lang = null) => {
   try {
     const langParam = lang ? `?lang=${lang}` : '';
+    const baseUrl = getApiBaseUrl();
     const response = await fetch(
-      `${process.env.REACT_APP_API_URL}/api/auctions/${auctionId}${langParam}`,
+      `${baseUrl}/api/auctions/${auctionId}${langParam}`,
       {
         method: 'PUT',
         headers: {
@@ -168,8 +180,9 @@ export const updateAuction = async (auctionId, auctionData, lang = null) => {
 export const setItemForAuction = async (itemId, lang = null) => {
   try {
     const langParam = lang ? `?lang=${lang}` : '';
+    const baseUrl = getApiBaseUrl();
     const response = await fetch(
-      `${process.env.REACT_APP_API_URL}/api/auctions/create-with-item/${itemId}${langParam}`,
+      `${baseUrl}/api/auctions/create-with-item/${itemId}${langParam}`,
       {
         method: 'POST',
         headers: {
@@ -198,8 +211,9 @@ export const setItemForAuction = async (itemId, lang = null) => {
 export const updateItemCustomization = async (itemId, customData, lang = null) => {
   try {
     const langParam = lang ? `?lang=${lang}` : '';
+    const baseUrl = getApiBaseUrl();
     const response = await fetch(
-      `${process.env.REACT_APP_API_URL}/api/items/customize/${itemId}${langParam}`,
+      `${baseUrl}/api/items/customize/${itemId}${langParam}`,
       {
         method: 'POST',
         headers: {
@@ -229,8 +243,9 @@ export const updateItemCustomization = async (itemId, customData, lang = null) =
 export const updateCollectorCustomization = async (collectorId, customData, lang = null) => {
   try {
     const langParam = lang ? `?lang=${lang}` : '';
+    const baseUrl = getApiBaseUrl();
     const response = await fetch(
-      `${process.env.REACT_APP_API_URL}/api/collectors/customize/${collectorId}${langParam}`,
+      `${baseUrl}/api/collectors/customize/${collectorId}${langParam}`,
       {
         method: 'POST',
         headers: {

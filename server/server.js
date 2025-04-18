@@ -40,6 +40,20 @@ app.use('/api/collectors', collectorRoutes);
 app.use('/api/auctions', auctionRoutes);
 app.use('/api/seed', seedRoutes);
 
+// Serve static files from the React app in production
+if (process.env.NODE_ENV === 'production') {
+  const clientBuildPath = path.join(__dirname, '../client/build');
+  console.log(`Serving static files from: ${clientBuildPath}`);
+  
+  // Serve static files
+  app.use(express.static(clientBuildPath));
+  
+  // Handle React routing, return all requests to React app
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(clientBuildPath, 'index.html'));
+  });
+}
+
 app.use((err, req, res, next) => {
     console.error("Error Handler Caught:", err.message);
 
