@@ -20,23 +20,42 @@
       },
       {
         "src": "/static/(.*)",
-        "dest": "/client/static/$1"
+        "dest": "/client/build/static/$1"
+      },
+      {
+        "src": "/images/(.*)",
+        "dest": "/client/build/images/$1"
+      },
+      {
+        "src": "/locales/(.*)",
+        "dest": "/client/build/locales/$1"
+      },
+      {
+        "src": "/background/(.*)",
+        "dest": "/client/build/background/$1"
+      },
+      {
+        "src": "/sounds/(.*)",
+        "dest": "/client/build/sounds/$1"
       },
       {
         "src": "/favicon.ico",
-        "dest": "/client/favicon.ico"
+        "dest": "/client/build/favicon.ico"
       },
       {
         "src": "/manifest.json",
-        "dest": "/client/manifest.json"
+        "dest": "/client/build/manifest.json"
       },
-
+      {
+        "src": "/asset-manifest.json",
+        "dest": "/client/build/asset-manifest.json"
+      },
       {
         "handle": "filesystem"
       },
       {
         "src": "/(.*)",           
-        "dest": "/client/index.html"
+        "dest": "/client/build/index.html"
       }
     ]
   }

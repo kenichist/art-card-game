@@ -3,7 +3,13 @@
 
 // Helper function to get the base API URL
 const getApiBaseUrl = () => {
-  return process.env.REACT_APP_API_URL || ''; // Use empty string if not defined
+  // In production (like Vercel), use relative URLs or the actual domain
+  if (process.env.NODE_ENV === 'production') {
+    // For Vercel deployment, use relative URLs (API routes will be handled by Vercel)
+    return '';  // Return empty string so we just use '/api/...' directly
+  }
+  // For local development
+  return process.env.REACT_APP_API_URL || '';
 };
 
 /**
