@@ -35,6 +35,10 @@
         "dest": "client/build/$1"
       },
       {
+        "src": "/favicon.ico",
+        "dest": "client/build/index.html"
+      },
+      {
         "src": "/(.*)",
         "dest": "client/build/index.html"
       }
