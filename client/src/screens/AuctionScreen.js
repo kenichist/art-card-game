@@ -459,15 +459,41 @@ const AuctionScreen = () => {
 
   const handleBid = async (collectorId) => {
     try {
-      if (!activeAuction || !currentItem) {
-        setError('No active auction found');
+      // Check both activeAuction and LocalApiService for an active auction
+      const localApiAuction = LocalApiService.getActiveAuction();
+      
+      if ((!activeAuction || !currentItem) && (!localApiAuction || localApiAuction.status !== 'active')) {
+        // Try loading from LocalApiService one more time
+        const storedItem = LocalApiService.getCurrentAuctionItem();
+        if (storedItem) {
+          try {
+            const itemData = await getItemById(storedItem.id, language);
+            setCurrentItem(itemData);
+            // Create an auction if none exists
+            const auctionData = await setItemForAuction(storedItem.id, language);
+            setActiveAuction(auctionData);
+          } catch (itemError) {
+            console.error('Error fetching stored item:', itemError);
+            setError('No active auction found - please select an item for auction first');
+            return;
+          }
+        } else {
+          setError('No active auction found - please select an item for auction first');
+          return;
+        }
+      }
+      
+      // If we still don't have an item, use the one from localApiAuction
+      const itemId = currentItem ? currentItem.id : (localApiAuction ? localApiAuction.itemId : null);
+      if (!itemId) {
+        setError('No item found for auction');
         return;
       }
 
       console.log(`[CLIENT] Placing bid with language: ${language}`);
       
       // Pass the language parameter to the match function
-      const matchData = await matchItemWithCollector(currentItem.id, collectorId, language);
+      const matchData = await matchItemWithCollector(itemId, collectorId, language);
       console.log('[CLIENT] Match data received:', matchData);
       
       // Apply manual translation if server didn't translate properly
@@ -488,13 +514,21 @@ const AuctionScreen = () => {
 
   const handleConfirmBid = async () => {
     try {
-      if (!activeAuction || !activeAuction._id) {
+      // Handle the case when active auction might be null but matchResults has the auction data
+      if (!activeAuction && (!matchResults || !matchResults.auction)) {
         setError('No active auction found');
+        return;
+      }
+      
+      const auctionId = activeAuction ? (activeAuction._id || activeAuction.id) : matchResults.auction.id;
+      
+      if (!auctionId) {
+        setError('Cannot find auction ID');
         return;
       }
 
       // Update the auction with the match results - pass language parameter
-      await updateAuction(activeAuction._id, {
+      await updateAuction(auctionId, {
         collectorId: matchResults.auction.collectorId,
         matchedDescriptions: matchResults.matchedDescriptions,
         totalValue: matchResults.totalValue,

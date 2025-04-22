@@ -20,7 +20,8 @@ export const API_EVENTS = {
 const STORAGE_KEYS = {
   CURRENT_AUCTION_ITEM: 'auction-current-item',
   SELECTED_ITEM: 'selected-item',
-  SELECTED_COLLECTOR: 'selected-collector'
+  SELECTED_COLLECTOR: 'selected-collector',
+  ACTIVE_AUCTION: 'active-auction' // New key for active auction storage
 };
 
 // API Service with methods that mimic RESTful API operations
@@ -42,8 +43,8 @@ const LocalApiService = {
   selectItemForAuction: (itemId, language) => {
     console.debug(`[LocalApiService] Selecting item ${itemId} for auction`);
     
-    // Clear any existing auctions first to ensure complete replacement
-    LocalApiService.clearCurrentAuction();
+    // We don't clear the current auction anymore unless we're replacing it
+    // with a new one, which we're doing below
     
     // Store the selected item
     localStorage.setItem(STORAGE_KEYS.SELECTED_ITEM, JSON.stringify({
@@ -57,6 +58,16 @@ const LocalApiService = {
       id: Number(itemId),
       language,
       timestamp: Date.now()
+    }));
+    
+    // Also save as active auction 
+    localStorage.setItem(STORAGE_KEYS.ACTIVE_AUCTION, JSON.stringify({
+      itemId: Number(itemId),
+      status: 'active',
+      language,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      id: Date.now().toString() // Simple ID generation
     }));
     
     // Dispatch event to notify components
@@ -77,6 +88,12 @@ const LocalApiService = {
   getCurrentAuctionItem: () => {
     const item = localStorage.getItem(STORAGE_KEYS.CURRENT_AUCTION_ITEM);
     return item ? JSON.parse(item) : null;
+  },
+  
+  // Get active auction 
+  getActiveAuction: () => {
+    const auction = localStorage.getItem(STORAGE_KEYS.ACTIVE_AUCTION);
+    return auction ? JSON.parse(auction) : null;
   },
   
   // COLLECTOR METHODS
@@ -125,9 +142,35 @@ const LocalApiService = {
     return { success: true, ...matchDetails };
   },
   
-  // Clear current auction item
-  clearCurrentAuction: () => {
-    localStorage.removeItem(STORAGE_KEYS.CURRENT_AUCTION_ITEM);
+  // Update active auction
+  updateActiveAuction: (updates) => {
+    const currentAuction = LocalApiService.getActiveAuction();
+    if (currentAuction) {
+      const updatedAuction = {
+        ...currentAuction,
+        ...updates,
+        updatedAt: new Date().toISOString()
+      };
+      localStorage.setItem(STORAGE_KEYS.ACTIVE_AUCTION, JSON.stringify(updatedAuction));
+      return { success: true, auction: updatedAuction };
+    }
+    return { success: false, error: 'No active auction found' };
+  },
+  
+  // Clear current auction item - modified to not actually clear the data unless explicitly requested
+  clearCurrentAuction: (forceRemove = false) => {
+    if (forceRemove) {
+      localStorage.removeItem(STORAGE_KEYS.CURRENT_AUCTION_ITEM);
+      localStorage.removeItem(STORAGE_KEYS.ACTIVE_AUCTION);
+    } else {
+      // Instead of removing, mark as inactive but keep the item
+      const currentAuction = LocalApiService.getActiveAuction();
+      if (currentAuction) {
+        currentAuction.status = 'inactive';
+        currentAuction.updatedAt = new Date().toISOString();
+        localStorage.setItem(STORAGE_KEYS.ACTIVE_AUCTION, JSON.stringify(currentAuction));
+      }
+    }
     return { success: true };
   }
 };

@@ -1,6 +1,7 @@
 // fileSystemService.js - Offline version that uses LocalDataService instead of API calls
 
 import LocalDataService from './LocalDataService';
+import LocalApiService from './LocalApiService';
 
 // Helper function to add delay to simulate async behavior (can be removed in production)
 const addDelay = (ms = 100) => new Promise(resolve => setTimeout(resolve, ms));
@@ -133,6 +134,10 @@ export const setItemForAuction = async (itemId, lang = null) => {
     // Convert itemId to number to ensure consistent comparison
     const numericItemId = Number(itemId);
     
+    // Use the improved LocalApiService to handle auction state
+    LocalApiService.selectItemForAuction(numericItemId, lang);
+    
+    // For backward compatibility, also update through LocalDataService
     // Clear any existing active auctions first
     const allAuctions = LocalDataService.auctions.getAllAuctions();
     const activeAuctions = allAuctions.filter(a => a.status === 'active');
@@ -199,31 +204,59 @@ export const matchItemWithCollector = async (itemId, collectorId, lang = null) =
       };
     });
     
-    // Get all auctions and find the active one
-    const auctions = LocalDataService.auctions.getAllAuctions();
-    console.debug('[matchItemWithCollector] All auctions:', auctions);
+    // First, check LocalApiService for active auction
+    let localApiAuction = LocalApiService.getActiveAuction();
+    let activeAuction;
     
-    // First try to find an auction with matching itemId
-    let activeAuction = auctions.find(a => a.itemId === numericItemId && a.status === 'active');
-    
-    // If no matching auction found, try any active auction
-    if (!activeAuction) {
-      console.debug('[matchItemWithCollector] No exact matching auction found. Looking for any active auction.');
-      activeAuction = auctions.find(a => a.status === 'active');
-    }
-    
-    // If still no auction found, create a new one
-    if (!activeAuction) {
-      console.debug('[matchItemWithCollector] No active auction found. Creating a new one for itemId:', numericItemId);
-      activeAuction = LocalDataService.auctions.createAuction({
-        itemId: numericItemId,
-        status: 'active',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      });
+    if (localApiAuction && localApiAuction.status === 'active') {
+      console.debug('[matchItemWithCollector] Found active auction in LocalApiService:', localApiAuction);
+      
+      // Get all auctions from LocalDataService and find/create the corresponding one
+      const auctions = LocalDataService.auctions.getAllAuctions();
+      
+      // Try to find a matching auction in LocalDataService
+      activeAuction = auctions.find(a => a.itemId === localApiAuction.itemId && a.status === 'active');
+      
+      // If no matching auction found, create one based on the LocalApiService data
+      if (!activeAuction) {
+        console.debug('[matchItemWithCollector] Creating new auction in LocalDataService based on LocalApiService data');
+        activeAuction = LocalDataService.auctions.createAuction({
+          itemId: localApiAuction.itemId,
+          status: 'active',
+          createdAt: localApiAuction.createdAt || new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        });
+      }
     } else {
-      console.debug('[matchItemWithCollector] Found active auction:', activeAuction);
+      // Fall back to the original logic if no auction in LocalApiService
+      const auctions = LocalDataService.auctions.getAllAuctions();
+      console.debug('[matchItemWithCollector] All auctions in LocalDataService:', auctions);
+      
+      // First try to find an auction with matching itemId
+      activeAuction = auctions.find(a => a.itemId === numericItemId && a.status === 'active');
+      
+      // If no matching auction found, try any active auction
+      if (!activeAuction) {
+        console.debug('[matchItemWithCollector] No exact matching auction found. Looking for any active auction.');
+        activeAuction = auctions.find(a => a.status === 'active');
+      }
+      
+      // If still no auction found, create a new one
+      if (!activeAuction) {
+        console.debug('[matchItemWithCollector] No active auction found. Creating a new one for itemId:', numericItemId);
+        activeAuction = LocalDataService.auctions.createAuction({
+          itemId: numericItemId,
+          status: 'active',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        });
+        
+        // Also store in LocalApiService to ensure consistency
+        LocalApiService.selectItemForAuction(numericItemId, lang);
+      }
     }
+    
+    console.debug('[matchItemWithCollector] Using active auction:', activeAuction);
     
     // Update the auction with match data
     LocalDataService.auctions.updateAuction(activeAuction.id, {
@@ -233,6 +266,17 @@ export const matchItemWithCollector = async (itemId, collectorId, lang = null) =
       totalValue: matchData.value,
       updatedAt: new Date().toISOString()
     });
+    
+    // Also update in LocalApiService
+    LocalApiService.updateActiveAuction({
+      itemId: numericItemId,
+      collectorId: numericCollectorId,
+      matchedDescriptions,
+      totalValue: matchData.value
+    });
+    
+    // Create the match in LocalApiService
+    LocalApiService.createMatch(numericItemId, numericCollectorId, lang);
     
     return {
       auction: {
@@ -285,12 +329,46 @@ const translateAttributeToZh = (englishAttribute) => {
 export const getActiveAuction = async (lang = null) => {
   try {
     await addDelay();
+    
+    // First check LocalApiService for active auction
+    const apiAuction = LocalApiService.getActiveAuction();
+    if (apiAuction && apiAuction.status === 'active') {
+      console.debug('[getActiveAuction] Found active auction in LocalApiService:', apiAuction);
+      
+      // Return in the expected format with _id for compatibility
+      return {
+        ...apiAuction,
+        _id: apiAuction.id // For compatibility with existing code
+      };
+    }
+    
+    // Fall back to LocalDataService if no auction in LocalApiService
     const auctions = LocalDataService.auctions.getAllAuctions();
     const activeAuction = auctions.find(a => a.status === 'active');
     
     if (!activeAuction) {
-      // Create a default auction if none exists (optional)
+      // If we have an inactive auction in LocalApiService, let's reactivate it
+      if (apiAuction && apiAuction.status === 'inactive') {
+        console.debug('[getActiveAuction] Reactivating inactive auction from LocalApiService');
+        
+        // Update the status in LocalApiService
+        LocalApiService.updateActiveAuction({ status: 'active' });
+        
+        // Return the reactivated auction
+        return {
+          ...apiAuction,
+          status: 'active',
+          _id: apiAuction.id
+        };
+      }
+      
       return null;
+    }
+    
+    // If we have an active auction in LocalDataService but not in LocalApiService, sync them
+    if (activeAuction && (!apiAuction || apiAuction.itemId !== activeAuction.itemId)) {
+      console.debug('[getActiveAuction] Syncing LocalDataService auction to LocalApiService');
+      LocalApiService.selectItemForAuction(activeAuction.itemId, lang);
     }
     
     return {
@@ -313,6 +391,8 @@ export const getActiveAuction = async (lang = null) => {
 export const updateAuction = async (auctionId, auctionData, lang = null) => {
   try {
     await addDelay();
+    
+    // Update in LocalDataService
     const updatedAuction = LocalDataService.auctions.updateAuction(auctionId, {
       ...auctionData,
       updatedAt: new Date().toISOString()
@@ -320,6 +400,18 @@ export const updateAuction = async (auctionId, auctionData, lang = null) => {
     
     if (!updatedAuction) {
       throw new Error('Failed to update auction');
+    }
+    
+    // Also update in LocalApiService if status is changing to 'completed'
+    if (auctionData.status === 'completed') {
+      // Don't remove the item, just mark as completed
+      LocalApiService.updateActiveAuction({ 
+        status: 'completed',
+        ...auctionData
+      });
+    } else {
+      // For other updates, sync both services
+      LocalApiService.updateActiveAuction(auctionData);
     }
     
     return {
