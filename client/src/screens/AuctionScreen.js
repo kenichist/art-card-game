@@ -1,23 +1,28 @@
 // --- START OF FILE AuctionScreen.js ---
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Container, Row, Col, Card, Button, Alert, ListGroup, Modal } from 'react-bootstrap';
+import { Container, Row, Col, Card, Button, Alert, ListGroup, Modal, Toast, ToastContainer } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
+import { useLocation, useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import FadeInOnScroll from '../components/FadeInOnScroll';
 import DealingCardAnimation from '../components/DealingCardAnimation';
 import { useLanguage } from '../contexts/LanguageContext';
+import LocalApiService, { API_EVENTS } from '../services/LocalApiService';
 import { 
   getActiveAuction, 
   getItemById, 
   getCollectors, 
   matchItemWithCollector,
-  updateAuction
+  updateAuction,
+  setItemForAuction
 } from '../services/fileSystemService';
 
 const AuctionScreen = () => {
   const { t } = useTranslation();
   const { language } = useLanguage();
+  const location = useLocation();
+  const navigate = useNavigate();
   const matchSoundRef = useRef(null);
   const successSoundRef = useRef(null);
   const particleContainerRef = useRef(null);
@@ -34,6 +39,71 @@ const AuctionScreen = () => {
   const [matchResults, setMatchResults] = useState(null);
   const [showMatchModal, setShowMatchModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+
+  // Debug logging for location state
+  useEffect(() => {
+    if (location.state?.itemId) {
+      console.debug('ItemID received from navigation:', location.state.itemId);
+    }
+  }, [location.state]);
+
+  // Handle item from navigation state
+  useEffect(() => {
+    const setupItemFromNavigation = async () => {
+      try {
+        if (location.state?.itemId && !currentItem) {
+          console.debug('Setting up item from navigation state, itemId:', location.state.itemId);
+          
+          // Create auction with the selected item
+          const itemId = location.state.itemId;
+          
+          // First check if there's already an active auction
+          const currentAuction = await getActiveAuction(language);
+          
+          if (currentAuction) {
+            console.debug('Active auction already exists:', currentAuction);
+            // If current auction has different item than the one from navigation, show toast
+            if (currentAuction.itemId !== Number(itemId)) {
+              setToastMessage(t('differentItemActive', { 
+                activeId: currentAuction.itemId, 
+                requestedId: itemId 
+              }) || `Item #${currentAuction.itemId} is already active (you requested #${itemId})`);
+              setShowToast(true);
+            }
+          } else {
+            // Set up new auction with the item from navigation
+            const itemData = await getItemById(itemId, language);
+            if (itemData) {
+              // Now create the auction with this item
+              const auctionData = await setItemForAuction(itemId, language);
+              
+              // Update state with new data
+              setActiveAuction(auctionData);
+              setCurrentItem(itemData);
+              
+              // Show notification
+              setToastMessage(t('itemSetForAuction', { itemId }) || `Item #${itemId} ready for auction!`);
+              setShowToast(true);
+              
+              console.debug('Successfully set up item for auction:', {
+                item: itemData,
+                auction: auctionData
+              });
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error setting up item from navigation:', error);
+        setError(error.message);
+      }
+    };
+    
+    if (!loading) {
+      setupItemFromNavigation();
+    }
+  }, [loading, location.state, language, currentItem, t]);
 
   useEffect(() => {
     // Check if this is a touch device
@@ -46,110 +116,158 @@ const AuctionScreen = () => {
     detectTouchDevice();
   }, []);
 
+  // Clear existing auctions and set up a new one when coming from ItemsScreen
   useEffect(() => {
-    // Create audio elements with error handling
-    try {
-      matchSoundRef.current = new Audio('/sounds/success.mp3'); // Using success.mp3 as fallback for both
-      successSoundRef.current = new Audio('/sounds/success.mp3');
-      
-      // Set volume if audio loaded successfully
-      if (matchSoundRef.current) matchSoundRef.current.volume = 0.5;
-      if (successSoundRef.current) successSoundRef.current.volume = 0.5;
-      
-      // Preload the audio files
-      matchSoundRef.current.load();
-      successSoundRef.current.load();
-    } catch (error) {
-      console.warn("Failed to initialize audio:", error);
-    }
-
-    return () => {
-      // Cleanup audio elements
-      if (matchSoundRef.current) {
-        matchSoundRef.current = null;
-      }
-      if (successSoundRef.current) {
-        successSoundRef.current = null;
-      }
-    };
-  }, []);
-
-  // Set up hover and touch effects
-  useEffect(() => {
-    if (!cardRef.current) return;
-    
-    // GSAP hover effects for desktop
-    const hoverEffect = (e) => {
-      if (isTouchDeviceRef.current) return; // Skip on touch devices
-      
-      gsap.to(e.currentTarget, {
-        scale: 1.05,
-        boxShadow: '0 10px 20px rgba(255, 215, 0, 0.3)',
-        duration: 0.3,
-        ease: 'power2.out'
-      });
-    };
-    
-    const leaveEffect = (e) => {
-      if (isTouchDeviceRef.current) return; // Skip on touch devices
-      
-      gsap.to(e.currentTarget, {
-        scale: 1,
-        boxShadow: '0 5px 10px rgba(0, 0, 0, 0.2)',
-        duration: 0.3,
-        ease: 'power2.out'
-      });
-    };
-    
-    // Double-tap functionality for touch devices
-    const handleTap = (e) => {
-      if (!isTouchDeviceRef.current) return; // Only for touch devices
-      
-      const currentTime = new Date().getTime();
-      const tapLength = currentTime - lastTapTimeRef.current;
-      
-      if (tapLength < 300 && tapLength > 0) {
-        // Double tap detected
-        e.preventDefault();
-        
-        if (isExpandedRef.current) {
-          // Collapse
-          gsap.to(e.currentTarget, {
-            scale: 1,
-            boxShadow: '0 5px 10px rgba(0, 0, 0, 0.2)',
-            duration: 0.3,
-            ease: 'power2.out'
-          });
-          isExpandedRef.current = false;
-        } else {
-          // Expand
-          gsap.to(e.currentTarget, {
-            scale: 1.1,
-            boxShadow: '0 15px 30px rgba(255, 215, 0, 0.4)',
-            duration: 0.3,
-            ease: 'power2.out'
-          });
-          isExpandedRef.current = true;
+    const clearAndSetupAuction = async () => {
+      if (location.state?.itemId) {
+        try {
+          console.debug('Clearing existing auctions and setting up new one with itemId:', location.state.itemId);
+          
+          // Get the selected item ID
+          const itemId = Number(location.state.itemId);
+          
+          // Force fetch the item data to ensure we have the correct image path
+          const itemData = await getItemById(itemId, language);
+          console.debug('Fetched item data:', itemData);
+          
+          // Create a new auction with this item
+          const auctionData = await setItemForAuction(itemId, language);
+          
+          // Update the state
+          setActiveAuction(auctionData);
+          setCurrentItem(itemData);
+          
+          // Show notification
+          setToastMessage(t('itemSetForAuction', { itemId }) || `Item #${itemId} ready for auction!`);
+          setShowToast(true);
+          
+        } catch (error) {
+          console.error('Error in clearAndSetupAuction:', error);
+          setError(error.message);
+          setToastMessage(t('error', { message: error.message }));
+          setShowToast(true);
         }
       }
+    };
+    
+    // Only run this once when coming from item selection
+    if (!loading && location.state?.itemId) {
+      clearAndSetupAuction();
+      // Clear the location state to prevent re-runs
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [loading, location.state?.itemId, language, t, navigate, location.pathname]);
+
+  // Use LocalApiService to get item data as a more reliable communication method between screens
+  useEffect(() => {
+    // Set up an event listener for when items are selected
+    const cleanup = LocalApiService.addEventListener(API_EVENTS.ITEM_SELECTED, async (event) => {
+      const { itemId, language: itemLanguage } = event.detail;
       
-      lastTapTimeRef.current = currentTime;
+      console.debug('[AuctionScreen] Received item selection event:', event.detail);
+      
+      try {
+        // Force fetch the item data to ensure we have the correct image path
+        const itemData = await getItemById(itemId, itemLanguage || language);
+        console.debug('[AuctionScreen] Fetched item data from event:', itemData);
+        
+        // Create or update the auction
+        const auctionData = await setItemForAuction(itemId, itemLanguage || language);
+        
+        // Update state with the latest data
+        setActiveAuction(auctionData);
+        setCurrentItem(itemData);
+        
+        // Show notification
+        setToastMessage(t('itemSetForAuction', { itemId }) || `Item #${itemId} ready for auction!`);
+        setShowToast(true);
+      } catch (error) {
+        console.error('[AuctionScreen] Error processing item selection event:', error);
+        setError(error.message);
+      }
+    });
+    
+    // Try to get the current auction item from LocalApiService
+    const tryLoadCurrentAuctionItem = async () => {
+      const currentAuctionItem = LocalApiService.getCurrentAuctionItem();
+      console.debug('[AuctionScreen] Retrieved current auction item from LocalApiService:', currentAuctionItem);
+      
+      if (currentAuctionItem && !currentItem) {
+        try {
+          // Force fetch the item data to ensure we have the correct image path
+          const itemData = await getItemById(currentAuctionItem.id, currentAuctionItem.language || language);
+          console.debug('[AuctionScreen] Fetched stored item data:', itemData);
+          
+          // If we already have an active auction, ensure it's for this item
+          // or create a new one if needed
+          let auctionData = activeAuction;
+          if (!auctionData || auctionData.itemId !== currentAuctionItem.id) {
+            auctionData = await setItemForAuction(currentAuctionItem.id, currentAuctionItem.language || language);
+          }
+          
+          // Update state with the latest data
+          setActiveAuction(auctionData);
+          setCurrentItem(itemData);
+          
+        } catch (error) {
+          console.error('[AuctionScreen] Error loading stored auction item:', error);
+        }
+      }
     };
     
-    // Add event listeners to the card
-    const card = cardRef.current;
+    // Try to load the current auction item when component mounts
+    if (!loading) {
+      tryLoadCurrentAuctionItem();
+    }
     
-    card.addEventListener('mouseenter', hoverEffect);
-    card.addEventListener('mouseleave', leaveEffect);
-    card.addEventListener('touchstart', handleTap);
+    // Clean up the event listener when the component unmounts
+    return cleanup;
+  }, [loading, language, t, currentItem, activeAuction]);
+
+  // Debug logging for data flow
+  useEffect(() => {
+    if (currentItem) {
+      console.debug('[AuctionScreen] Current item data:', {
+        id: currentItem.id,
+        name: currentItem.name,
+        image: currentItem.image
+      });
+    }
     
-    return () => {
-      // Clean up event listeners
-      card.removeEventListener('mouseenter', hoverEffect);
-      card.removeEventListener('mouseleave', leaveEffect);
-      card.removeEventListener('touchstart', handleTap);
+    if (activeAuction) {
+      console.debug('[AuctionScreen] Active auction data:', {
+        id: activeAuction.id || activeAuction._id,
+        itemId: activeAuction.itemId,
+        status: activeAuction.status
+      });
+    }
+  }, [currentItem, activeAuction]);
+
+  // Ensure image path is always correct
+  useEffect(() => {
+    const ensureCorrectImagePath = async () => {
+      if (activeAuction && currentItem) {
+        // Check if the currentItem's ID matches the auction's itemId
+        if (Number(currentItem.id) !== Number(activeAuction.itemId)) {
+          console.debug('[AuctionScreen] Item ID mismatch, fetching correct item:', {
+            currentItemId: currentItem.id,
+            auctionItemId: activeAuction.itemId
+          });
+          
+          // Re-fetch the correct item data
+          try {
+            const correctItemData = await getItemById(activeAuction.itemId, language);
+            console.debug('[AuctionScreen] Fetched correct item data:', correctItemData);
+            setCurrentItem(correctItemData);
+          } catch (error) {
+            console.error('[AuctionScreen] Error fetching correct item:', error);
+          }
+        }
+      }
     };
-  }, [currentItem]); // Re-run when currentItem changes
+    
+    ensureCorrectImagePath();
+  }, [activeAuction, currentItem, language]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -178,6 +296,24 @@ const AuctionScreen = () => {
     };
     fetchData();
   }, [language]); // Re-fetch when language changes
+
+  // Debug logging for what happens when component mounts
+  useEffect(() => {
+    console.group('🔍 AuctionScreen Debug - Component Mount');
+    console.debug('Current path:', location.pathname);
+    console.debug('Location state:', location.state);
+    
+    // Check what's in the LocalApiService
+    const currentAuctionItem = LocalApiService.getCurrentAuctionItem();
+    console.debug('Current auction item in LocalApiService:', currentAuctionItem);
+    
+    console.groupEnd();
+    
+    // Return cleanup function
+    return () => {
+      console.debug('AuctionScreen unmounting');
+    };
+  }, [location]);
 
   const createParticles = () => {
     const container = particleContainerRef.current;
@@ -274,16 +410,20 @@ const AuctionScreen = () => {
     return `${type} ${id}`;
   };
   
-  // Helper function to determine collector type from image filename
+  // Helper function to determine collector type from image ID instead of prefix
   const getCollectorType = (imageUrl) => {
     if (!imageUrl) return t('unknownCollector');
-    const filename = imageUrl.split('/').pop();
     
-    if (filename.startsWith('i')) {
+    // Extract filename and ID from the path
+    const filename = imageUrl.split('/').pop();
+    const id = parseInt(filename.split('.')[0]);
+    
+    // Determine collector type based on ID range
+    if (id >= 1 && id <= 10) {
       return t('illustrationCollector');
-    } else if (filename.startsWith('p')) {
+    } else if (id >= 11 && id <= 20) {
       return t('productCollector');
-    } else if (filename.startsWith('s')) {
+    } else if (id >= 21 && id <= 30) {
       return t('sculptureCollector');
     }
     
@@ -293,11 +433,14 @@ const AuctionScreen = () => {
   // Helper function to get collector number from filename
   const getCollectorNumber = (imageUrl) => {
     if (!imageUrl) return '';
+    
+    // Extract filename from image URL
     const filename = imageUrl.split('/').pop();
     
-    // Example: Extract '1' from 'i1.jpg'
-    if (filename.match(/^[ips]\d+\.jpg$/i)) {
-      return filename.match(/^[ips](\d+)\.jpg$/i)[1];
+    // Extract the number from the filename (e.g., "15.jpg" -> "15")
+    const match = filename.match(/(\d+)\.jpg$/i);
+    if (match) {
+      return match[1];
     }
     
     return '';
@@ -397,120 +540,164 @@ const AuctionScreen = () => {
   if (error) return <h3>{t('error', { message: error })}</h3>;
 
   return (
-    <Container>
-      <FadeInOnScroll>
-        <h1 className="page-heading my-4">{t('auctionTitle')}</h1>
-      </FadeInOnScroll>
+    <>
+      <Container>
+        <FadeInOnScroll>
+          <h1 className="page-heading my-4">{t('auctionTitle')}</h1>
+        </FadeInOnScroll>
 
-      {currentItem ? (
-        <Row className="mb-5 justify-content-center">
-          <Col md={8} className="text-center">
-            <FadeInOnScroll>
-              <Card className="mx-auto" style={{ maxWidth: "550px" }} ref={cardRef}>
-                <Card.Img
-                  variant="top"
-                  src={currentItem?.image}
-                  alt={currentItem?.name}
-                  className="item-image"
-                  style={{ 
-                    width: "100%", 
-                    maxWidth: "1000px", 
-                    height: "auto", 
-                    maxHeight: "404px", 
-                    objectFit: "contain",
-                    margin: "0 auto",
-                    display: "block",
-                    padding: "15px"
-                  }}
-                />
-                <Card.Body>
-                  <Card.Title>{currentItem?.name}</Card.Title>
-                  {currentItem?.descriptions && (
-                    <ListGroup variant="flush">
-                      {currentItem.descriptions.map((desc, index) => (
-                        <ListGroup.Item key={index}>
-                          <strong>{desc.attribute}:</strong> {desc.value}
-                        </ListGroup.Item>
-                      ))}
-                    </ListGroup>
-                  )}
-                </Card.Body>
-              </Card>
-            </FadeInOnScroll>
-          </Col>
+        {currentItem ? (
+          <Row className="mb-5 justify-content-center">
+            <Col md={8} className="text-center">
+              <FadeInOnScroll>
+                <Card className="mx-auto" style={{ maxWidth: "550px" }} ref={cardRef}>
+                  <Card.Img
+                    variant="top"
+                    src={currentItem?.image}
+                    alt={currentItem?.name}
+                    className="item-image"
+                    style={{ 
+                      width: "100%", 
+                      maxWidth: "1000px", 
+                      height: "auto", 
+                      maxHeight: "404px", 
+                      objectFit: "contain",
+                      margin: "0 auto",
+                      display: "block",
+                      padding: "15px"
+                    }}
+                  />
+                  <Card.Body>
+                    <Card.Title>{currentItem?.name}</Card.Title>
+                    {currentItem?.descriptions && (
+                      <ListGroup variant="flush">
+                        {currentItem.descriptions.map((desc, index) => (
+                          <ListGroup.Item key={index}>
+                            <strong>{desc.attribute}:</strong> {desc.value}
+                          </ListGroup.Item>
+                        ))}
+                      </ListGroup>
+                    )}
+                  </Card.Body>
+                </Card>
+              </FadeInOnScroll>
+            </Col>
+          </Row>
+        ) : (
+          <Alert variant="info">{t('noActiveAuction')}</Alert>
+        )}
+
+        <FadeInOnScroll>
+          <h2 className="mb-4">{t('yourCollections')}</h2>
+        </FadeInOnScroll>
+
+        <Row>
+          {userCollections.map((collector, index) => (
+            <Col key={collector.id || collector._id || `collector-${index}`} sm={12} md={6} lg={4} className="mb-4">
+              <DealingCardAnimation 
+                collector={collector}
+                onBidClick={handleBid}
+                disabled={!currentItem}
+                index={index}
+              />
+            </Col>
+          ))}
         </Row>
-      ) : (
-        <Alert variant="info">{t('noActiveAuction')}</Alert>
-      )}
 
-      <FadeInOnScroll>
-        <h2 className="mb-4">{t('yourCollections')}</h2>
-      </FadeInOnScroll>
-
-      <Row>
-        {userCollections.map((collector, index) => (
-          <Col key={collector._id} sm={12} md={6} lg={4} className="mb-4">
-            <DealingCardAnimation 
-              collector={collector}
-              onBidClick={handleBid}
-              disabled={!currentItem}
-              index={index}
-            />
-          </Col>
-        ))}
-      </Row>
-
-      <Modal show={showMatchModal} onHide={() => setShowMatchModal(false)} className="match-modal" aria-labelledby="match-modal-title">
-        <Modal.Header closeButton>
-          <Modal.Title id="match-modal-title" style={{ color: '#ffd700' }}>{t('matchResults')}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {matchResults && (
-            <>
-              <h5 className="matched-title">{t('matchedDescriptions')}:</h5>
-              <ListGroup className="mb-3 matched-list">
-                {matchResults.matchedDescriptions && matchResults.matchedDescriptions.length > 0 ? (
-                  matchResults.matchedDescriptions.map((desc, index) => (
-                    <ListGroup.Item key={index} className="matched-item">
-                      <strong>• {desc.attribute}</strong>
+        <Modal show={showMatchModal} onHide={() => setShowMatchModal(false)} className="match-modal" aria-labelledby="match-modal-title">
+          <Modal.Header closeButton>
+            <Modal.Title id="match-modal-title" style={{ color: '#ffd700' }}>{t('matchResults')}</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            {matchResults && (
+              <>
+                <h5 className="matched-title">{t('matchedDescriptions')}:</h5>
+                <ListGroup className="mb-3 matched-list">
+                  {matchResults.matchedDescriptions && matchResults.matchedDescriptions.length > 0 ? (
+                    matchResults.matchedDescriptions.map((desc, index) => (
+                      <ListGroup.Item key={index} className="matched-item">
+                        <strong>• {desc.attribute}</strong>
+                      </ListGroup.Item>
+                    ))
+                  ) : (
+                    <ListGroup.Item className="matched-item">
+                      <strong>{t('noMatch')}</strong>
                     </ListGroup.Item>
-                  ))
-                ) : (
-                  <ListGroup.Item className="matched-item">
-                    <strong>{t('noMatch')}</strong>
-                  </ListGroup.Item>
-                )}
-              </ListGroup>
-              <h5 className="total-value">{t('totalValue', { value: matchResults.totalValue })}</h5>
-            </>
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowMatchModal(false)}>
-            {t('cancel')}
-          </Button>
-          <Button variant="primary" onClick={handleConfirmBid} className="confirm-bid-btn">
-            {t('confirmBid')}
-          </Button>
-        </Modal.Footer>
-      </Modal>
+                  )}
+                </ListGroup>
+                <h5 className="total-value">{t('totalValue', { value: matchResults.totalValue })}</h5>
+              </>
+            )}
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowMatchModal(false)}>
+              {t('cancel')}
+            </Button>
+            <Button variant="primary" onClick={handleConfirmBid} className="confirm-bid-btn">
+              {t('confirmBid')}
+            </Button>
+          </Modal.Footer>
+        </Modal>
 
-      <Modal 
-        show={showSuccessModal} 
-        centered
-        className="success-modal"
-        aria-labelledby="success-modal-title"
-      >
-        <Modal.Body className="text-center py-5">
-          <div ref={particleContainerRef} className="particle-container" />
-          <div className="success-animation">
-            <i className="fas fa-check-circle" aria-hidden="true"></i>
+        <Modal 
+          show={showSuccessModal} 
+          centered
+          className="success-modal"
+          aria-labelledby="success-modal-title"
+        >
+          <Modal.Body className="text-center py-5">
+            <div ref={particleContainerRef} className="particle-container" />
+            <div className="success-animation">
+              <i className="fas fa-check-circle" aria-hidden="true"></i>
+            </div>
+            <h4 id="success-modal-title">{t('bidSuccessful')}</h4>
+          </Modal.Body>
+        </Modal>
+      </Container>
+
+      {/* Custom toast notification - completely independent of page scroll */}
+      {showToast && (
+        <div 
+          style={{ 
+            position: 'fixed',
+            bottom: '20px',
+            right: '20px',
+            zIndex: 9999,
+            backgroundColor: '#198754', /* Bootstrap success color */
+            color: 'white',
+            padding: '15px',
+            borderRadius: '5px',
+            boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
+            minWidth: '250px',
+            fontFamily: 'inherit'
+          }}
+        >
+          <div style={{ 
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '8px',
+            borderBottom: '1px solid rgba(255,255,255,0.3)',
+            paddingBottom: '8px'
+          }}>
+            <strong>{t('notification')}</strong>
+            <button 
+              onClick={() => setShowToast(false)} 
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'white',
+                fontSize: '16px',
+                cursor: 'pointer'
+              }}
+            >
+              ×
+            </button>
           </div>
-          <h4 id="success-modal-title">{t('bidSuccessful')}</h4>
-        </Modal.Body>
-      </Modal>
-
-    </Container>
+          <div>{toastMessage}</div>
+        </div>
+      )}
+    </>
   );
 };
 

@@ -31,17 +31,20 @@ const CollectorDetailScreen = () => {
     fetchCollector();
   }, [id, language]); // Re-fetch when language or id changes
 
-  // Helper function to get collector type from image filename
+  // Helper function to get collector type from ID range instead of file prefix
   const getCollectorType = (imageUrl) => {
-    // Extract filename from image URL
-    const filename = imageUrl.split('/').pop();
+    if (!imageUrl) return t('unknownCollector');
     
-    // Get appropriate translation based on collector type prefix
-    if (filename.startsWith('i')) {
+    // Extract filename and ID from the path
+    const filename = imageUrl.split('/').pop();
+    const id = parseInt(filename.split('.')[0]);
+    
+    // Determine collector type based on ID range
+    if (id >= 1 && id <= 10) {
       return t('illustrationCollector');
-    } else if (filename.startsWith('p')) {
+    } else if (id >= 11 && id <= 20) {
       return t('productCollector');
-    } else if (filename.startsWith('s')) {
+    } else if (id >= 21 && id <= 30) {
       return t('sculptureCollector');
     }
     
@@ -59,15 +62,18 @@ const CollectorDetailScreen = () => {
     return `${type} ${number}`;
   };
 
-  // Helper function to provide detailed descriptions based on collector type
+  // Helper function to provide detailed descriptions based on collector type ID range
   const getCollectorTypeDescription = (imageUrl) => {
+    // Extract filename and ID from the path
     const filename = imageUrl.split('/').pop();
+    const id = parseInt(filename.split('.')[0]);
     
-    if (filename.startsWith('i')) {
+    // Determine collector type description based on ID range
+    if (id >= 1 && id <= 10) {
       return t('illustrationCollectorDescription');
-    } else if (filename.startsWith('p')) {
+    } else if (id >= 11 && id <= 20) {
       return t('productCollectorDescription');
-    } else if (filename.startsWith('s')) {
+    } else if (id >= 21 && id <= 30) {
       return t('sculptureCollectorDescription');
     }
     
@@ -76,11 +82,15 @@ const CollectorDetailScreen = () => {
 
   // Helper function to get collector number from filename
   const getCollectorNumber = (imageUrl) => {
+    if (!imageUrl) return '';
+    
+    // Extract filename from image URL
     const filename = imageUrl.split('/').pop();
     
-    // Example: Extract '1' from 'i1.jpg'
-    if (filename.match(/^[ips]\d+\.jpg$/i)) {
-      return filename.match(/^[ips](\d+)\.jpg$/i)[1];
+    // Extract the number from the filename (e.g., "15.jpg" -> "15")
+    const match = filename.match(/(\d+)\.jpg$/i);
+    if (match) {
+      return match[1];
     }
     
     return '';

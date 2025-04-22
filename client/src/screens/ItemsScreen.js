@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import FadeInOnScroll from '../components/FadeInOnScroll';
 import ViewModeToggle from '../components/ViewModeToggle';
 import { getItems, setItemForAuction } from '../services/fileSystemService';
+import LocalApiService from '../services/LocalApiService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faChevronLeft, faChevronRight, faGavel } from '@fortawesome/free-solid-svg-icons';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -96,15 +97,15 @@ const ItemsScreen = () => {
     
     // Set up GSAP effects after a short delay to ensure DOM is ready
     const timer = setTimeout(() => {
-      setupCardEffects();
+      if (setupCardEffects) setupCardEffects();
     }, 100);
     
     return () => {
       clearTimeout(timer);
       // Clean up any lingering event listeners
-      cleanupCardEffects();
+      if (cleanupCardEffects) cleanupCardEffects();
     };
-  }, [currentPage, itemsPerPage, searchTerm, items, setupCardEffects]); // Added setupCardEffects dependency
+  }, [currentPage, itemsPerPage, searchTerm, items]); // Remove setupCardEffects from dependencies
 
   const setupCardEffects = useCallback(() => {
     // Function to apply effects to a single card
@@ -237,16 +238,41 @@ const ItemsScreen = () => {
   // Handler function for setting an item for auction
   const handleUseForAuction = async (itemId) => {
     try {
+      console.group('🔍 Use For Auction Debug - ItemsScreen');
+      console.debug('Selected Item ID:', itemId);
+      console.debug('Item Details:', items.find(item => item.id == itemId));
+      console.debug('Current Language:', language);
+      
       setSelectedItemId(itemId);
-      await setItemForAuction(itemId, language);
-      setToastMessage(t('itemSetForAuction', { itemId }));
+      
+      // Use the LocalApiService to register the item for auction
+      console.debug('Calling LocalApiService.selectItemForAuction...');
+      const apiResult = LocalApiService.selectItemForAuction(itemId, language);
+      console.debug('LocalApiService result:', apiResult);
+      
+      // Still create the auction with fileSystemService for backward compatibility
+      console.debug('Calling setItemForAuction...');
+      const auctionResult = await setItemForAuction(itemId, language);
+      console.debug('Auction creation result:', auctionResult);
+      
+      // Update the toast message to clearly include the item ID
+      setToastMessage(t('itemSetForAuction', { itemId: itemId }));
       setShowToast(true);
       
+      // Check what's stored in LocalApiService
+      const storedItem = LocalApiService.getCurrentAuctionItem();
+      console.debug('Stored auction item in LocalApiService:', storedItem);
+      
       // Navigate to auction screen after a short delay
+      console.debug('Will navigate to auction screen in 1.5 seconds');
       setTimeout(() => {
+        console.debug('Navigating to auction screen now');
         navigate('/auction');
       }, 1500);
+      
+      console.groupEnd();
     } catch (error) {
+      console.error('Error setting item for auction:', error);
       setToastMessage(t('error', { message: error.message }));
       setShowToast(true);
     } finally {
@@ -420,7 +446,16 @@ const ItemsScreen = () => {
       )}
       
       {/* Toast notification */}
-      <ToastContainer position="top-end" className="p-3" style={{ zIndex: 1050 }}>
+      <ToastContainer 
+        className="p-3" 
+        position="bottom-end" 
+        style={{ 
+          zIndex: 1050, 
+          position: 'fixed', 
+          bottom: '20px', 
+          right: '20px'
+        }}
+      >
         <Toast 
           show={showToast} 
           onClose={() => setShowToast(false)} 

@@ -1,6 +1,6 @@
 // --- START OF FILE CollectorsScreen.js ---
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Container, Row, Col, Card, Button, Pagination, Form, InputGroup } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -11,6 +11,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { useLanguage } from '../contexts/LanguageContext';
 import gsap from 'gsap';
+import LocalDataService from '../services/LocalDataService';
 
 // Import the GSAP Flip plugin (if not already imported in ViewModeToggle)
 import { Flip } from 'gsap/Flip';
@@ -34,15 +35,23 @@ const CollectorsScreen = () => {
   const isExpandedRef = useRef({});
   const isTouchDeviceRef = useRef(false);
 
-  // Helper function to determine collector type from image filename
+  const [debugInfo, setDebugInfo] = useState('');
+  const [imageTestResults, setImageTestResults] = useState({});
+
+  // Helper function to determine collector type from ID range instead of file prefix
   const getCollectorType = (imageUrl) => {
-    const filename = imageUrl.split('/').pop();
+    if (!imageUrl) return t('unknownCollector');
     
-    if (filename.startsWith('i')) {
+    // Extract filename and ID from the path
+    const filename = imageUrl.split('/').pop();
+    const id = parseInt(filename.split('.')[0]);
+    
+    // Determine collector type based on ID range
+    if (id >= 1 && id <= 10) {
       return t('illustrationCollector');
-    } else if (filename.startsWith('p')) {
+    } else if (id >= 11 && id <= 20) {
       return t('productCollector');
-    } else if (filename.startsWith('s')) {
+    } else if (id >= 21 && id <= 30) {
       return t('sculptureCollector');
     }
     
@@ -51,11 +60,15 @@ const CollectorsScreen = () => {
   
   // Helper function to get collector number from filename
   const getCollectorNumber = (imageUrl) => {
+    if (!imageUrl) return '';
+    
+    // Extract filename from image URL
     const filename = imageUrl.split('/').pop();
     
-    // Example: Extract '1' from 'i1.jpg'
-    if (filename.match(/^[ips]\d+\.jpg$/i)) {
-      return filename.match(/^[ips](\d+)\.jpg$/i)[1];
+    // Extract the number from the filename (e.g., "15.jpg" -> "15")
+    const match = filename.match(/(\d+)\.jpg$/i);
+    if (match) {
+      return match[1];
     }
     
     return '';
@@ -89,19 +102,24 @@ const CollectorsScreen = () => {
       (navigator.msMaxTouchPoints > 0);
   }, []);
 
+  // Function to fetch collectors that can be called from other functions
+  const fetchCollectors = async () => {
+    try {
+      setLoading(true);
+      const data = await getCollectors(language);
+      console.log('Fetched collectors:', data);
+      const sortedData = [...data].sort((a, b) => Number(a.id) - Number(b.id));
+      console.log('Sorted collectors:', sortedData);
+      setCollectors(sortedData);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching collectors:', error);
+      setError(error.message);
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchCollectors = async () => {
-      try {
-        setLoading(true);
-        const data = await getCollectors(language);
-        const sortedData = [...data].sort((a, b) => Number(a.id) - Number(b.id));
-        setCollectors(sortedData);
-        setLoading(false);
-      } catch (error) {
-        setError(error.message);
-        setLoading(false);
-      }
-    };
     fetchCollectors();
   }, [language]);
 
@@ -112,17 +130,17 @@ const CollectorsScreen = () => {
     
     // Set up GSAP effects after a short delay to ensure DOM is ready
     const timer = setTimeout(() => {
-      setupCardEffects();
+      if (setupCardEffects) setupCardEffects();
     }, 100);
     
     return () => {
       clearTimeout(timer);
       // Clean up any lingering event listeners
-      cleanupCardEffects();
+      if (cleanupCardEffects) cleanupCardEffects();
     };
-  }, [currentPage, collectorsPerPage, searchTerm, collectors, setupCardEffects]); // Added setupCardEffects dependency
+  }, [currentPage, collectorsPerPage, searchTerm, collectors]); // Remove setupCardEffects from dependencies
 
-  const setupCardEffects = () => {
+  const setupCardEffects = useCallback(() => {
     // Function to apply effects to a single card
     const applyCardEffects = (cardRef, cardId) => {
       if (!cardRef) return null;
@@ -214,12 +232,12 @@ const CollectorsScreen = () => {
     return () => {
       cleanupFunctions.forEach(cleanup => cleanup && cleanup());
     };
-  };
+  }, [currentCollectors]);
   
-  const cleanupCardEffects = () => {
+  const cleanupCardEffects = useCallback(() => {
     // This function will be called on component unmount or when currentCollectors changes
     // Any cleanup that needs to happen can go here
-  };
+  }, []);
 
   const paginate = (pageNumber) => {
     setCurrentPage(pageNumber);
