@@ -48,16 +48,26 @@ const AssetPreloader = ({ onLoadComplete, children }) => {
         console.log(`Preloading ${allAssets.length} assets...`);
 
         // Preload all assets
-        const preloadPromises = allAssets.map((asset) => {
+        const preloadPromises = allAssets.map((asset, index) => {
           return new Promise((resolve) => {
             // Log the current asset being loaded
             console.log(`Loading asset: ${asset}`);
             setCurrentAsset(asset.split('/').pop()); // Extract filename for display
             
+            // Set a timeout for each asset to avoid hanging
+            const timeout = setTimeout(() => {
+              console.warn(`⚠️ Timeout loading asset: ${asset}`);
+              loadedCount++;
+              setLoadedAssets(loadedCount);
+              setLoadingProgress(Math.floor((loadedCount / allAssets.length) * 100));
+              resolve(asset); // Resolve after timeout to prevent getting stuck
+            }, 10000); // 10 second timeout for each asset
+            
             if (asset.match(/\.(jpg|jpeg|png|gif|svg)$/i)) {
               const img = new Image();
               img.src = asset;
               img.onload = () => {
+                clearTimeout(timeout); // Clear timeout on successful load
                 loadedCount++;
                 setLoadedAssets(loadedCount);
                 setLoadingProgress(Math.floor((loadedCount / allAssets.length) * 100));
@@ -65,6 +75,7 @@ const AssetPreloader = ({ onLoadComplete, children }) => {
                 resolve(asset);
               };
               img.onerror = () => {
+                clearTimeout(timeout); // Clear timeout on error
                 console.warn(`❌ Failed to load image: ${asset}`);
                 loadedCount++;
                 setLoadedAssets(loadedCount);
@@ -76,6 +87,7 @@ const AssetPreloader = ({ onLoadComplete, children }) => {
               audio.preload = 'auto';
               audio.src = asset;
               audio.oncanplaythrough = () => {
+                clearTimeout(timeout); // Clear timeout on successful load
                 loadedCount++;
                 setLoadedAssets(loadedCount);
                 setLoadingProgress(Math.floor((loadedCount / allAssets.length) * 100));
@@ -83,6 +95,7 @@ const AssetPreloader = ({ onLoadComplete, children }) => {
                 resolve(asset);
               };
               audio.onerror = () => {
+                clearTimeout(timeout); // Clear timeout on error
                 console.warn(`❌ Failed to load audio: ${asset}`);
                 loadedCount++;
                 setLoadedAssets(loadedCount);
@@ -91,17 +104,20 @@ const AssetPreloader = ({ onLoadComplete, children }) => {
               };
               // For Safari, which may not trigger oncanplaythrough
               setTimeout(() => {
-                if (!audio.oncanplaythrough) {
+                if (audio.readyState < 4) { // If not loaded completely
+                  clearTimeout(timeout); // Clear master timeout
+                  console.warn(`⚠️ Audio not fully loaded but continuing: ${asset}`);
                   loadedCount++;
                   setLoadedAssets(loadedCount);
                   setLoadingProgress(Math.floor((loadedCount / allAssets.length) * 100));
                   resolve(asset);
                 }
-              }, 3000);
+              }, 5000);
             } else if (asset.match(/\.json$/i)) {
               // Handle JSON files like translations
               fetch(asset)
                 .then(() => {
+                  clearTimeout(timeout); // Clear timeout on successful load
                   loadedCount++;
                   setLoadedAssets(loadedCount);
                   setLoadingProgress(Math.floor((loadedCount / allAssets.length) * 100));
@@ -109,6 +125,7 @@ const AssetPreloader = ({ onLoadComplete, children }) => {
                   resolve(asset);
                 })
                 .catch(() => {
+                  clearTimeout(timeout); // Clear timeout on error
                   console.warn(`❌ Failed to load JSON: ${asset}`);
                   loadedCount++;
                   setLoadedAssets(loadedCount);
@@ -117,6 +134,7 @@ const AssetPreloader = ({ onLoadComplete, children }) => {
                 });
             } else {
               // For other file types, just resolve
+              clearTimeout(timeout); // Clear timeout immediately
               loadedCount++;
               setLoadedAssets(loadedCount);
               setLoadingProgress(Math.floor((loadedCount / allAssets.length) * 100));
@@ -125,12 +143,30 @@ const AssetPreloader = ({ onLoadComplete, children }) => {
           });
         });
 
-        // When all assets are loaded
-        await Promise.all(preloadPromises);
-        console.log('✨ All assets preloaded!');
+        // Add global timeout to ensure we don't wait forever
+        const globalTimeoutPromise = new Promise(resolve => {
+          setTimeout(() => {
+            console.warn("⚠️ Global timeout reached. Proceeding with application.");
+            resolve("timeout");
+          }, 30000); // 30 second global timeout
+        });
+
+        // Race between all assets loading and global timeout
+        await Promise.race([
+          Promise.all(preloadPromises),
+          globalTimeoutPromise
+        ]);
+
+        console.log('✨ All assets preloaded or timeout reached!');
         
         // Reset current asset to avoid showing the last loaded asset when done
         setCurrentAsset('');
+        
+        // Force progress to 100% if we're almost there (handles last asset stuck)
+        if (loadingProgress > 95) {
+          setLoadingProgress(100);
+          setLoadedAssets(totalAssets);
+        }
         
         // Add a small delay to ensure UI updates before hiding the loader
         setTimeout(() => {
@@ -160,7 +196,7 @@ const AssetPreloader = ({ onLoadComplete, children }) => {
 
   // Create a message based on loading status
   const getLoadingMessage = () => {
-    if (loadingProgress === 100) {
+    if (loadingProgress >= 98) {
       return "Finalizing...";
     } else if (currentAsset) {
       return `Currently loading: ${currentAsset}`;
