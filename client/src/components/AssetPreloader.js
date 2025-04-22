@@ -23,26 +23,16 @@ const AssetPreloader = ({ onLoadComplete, children }) => {
         // Add sound assets
         allAssets.push(`${process.env.PUBLIC_URL}/sounds/success.mp3`);
         
-        // Add collector type images
-        allAssets.push(`${process.env.PUBLIC_URL}/images/collectors/Illustration.jpg`);
-        allAssets.push(`${process.env.PUBLIC_URL}/images/collectors/Products.jpg`);
-        allAssets.push(`${process.env.PUBLIC_URL}/images/collectors/Sculpture.jpg`);
-        
         // Add numbered collector images - based on actual file structure
         // Numbers only, no letter prefixes
-        for (let i = 1; i <= 10; i++) {
-          // Add main collector images (1.jpg, 2.jpg, etc.)
-          allAssets.push(`${process.env.PUBLIC_URL}/images/collectors/${i}.jpg`);
-          
-          // Add English and Chinese versions if they exist
+        for (let i = 1; i <= 10; i++) {          
+          // Add English and Chinese versions
           allAssets.push(`${process.env.PUBLIC_URL}/images/collectors/en/${i}.jpg`);
           allAssets.push(`${process.env.PUBLIC_URL}/images/collectors/zh/${i}.jpg`);
         }
         
         // Add item images
-        // Add the card back image
-        allAssets.push(`${process.env.PUBLIC_URL}/images/items/0之后开始 1-24牌背.jpg`);
-        
+
         // Add numbered item images
         for (let i = 1; i <= 24; i++) {
           allAssets.push(`${process.env.PUBLIC_URL}/images/items/en/${i}.jpg`);
