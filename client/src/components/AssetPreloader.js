@@ -12,79 +12,53 @@ const AssetPreloader = ({ onLoadComplete, children }) => {
   useEffect(() => {
     const preloadImages = async () => {
       try {
-        // Paths to scan for assets to preload
-        const assetPaths = [
-          '/images/collectors/',
-          '/images/collectors/en/',
-          '/images/collectors/zh/',
-          '/images/items/',
-          '/images/items/en/',
-          '/images/items/zh/',
-          '/background/',
-          '/sounds/'
-        ];
-
+        // Define known assets to preload based on your actual folder structure
         let allAssets = [];
         let loadedCount = 0;
 
-        // Collect all assets from the paths
-        for (const path of assetPaths) {
-          try {
-            const response = await axios.get(`${process.env.PUBLIC_URL}${path}`, { 
-              headers: { 'Accept': 'application/json' } 
-            });
-            
-            // This might need adjustment depending on your server's directory listing format
-            // Here we're making a simple assumption about file URLs
-            if (response.data && typeof response.data === 'string') {
-              // Parse HTML directory listing for file links
-              const regex = /href="([^"]+\.(jpg|jpeg|png|gif|svg|mp3|wav))/gi;
-              let match;
-              while ((match = regex.exec(response.data)) !== null) {
-                allAssets.push(`${process.env.PUBLIC_URL}${path}${match[1]}`);
-              }
-            }
-          } catch (error) {
-            console.warn(`Couldn't scan directory ${path}:`, error);
-          }
+        // Add background images
+        allAssets.push(`${process.env.PUBLIC_URL}/background/horizontal-bg.jpg`);
+        allAssets.push(`${process.env.PUBLIC_URL}/background/vertical-bg.jpg`);
+        
+        // Add sound assets
+        allAssets.push(`${process.env.PUBLIC_URL}/sounds/success.mp3`);
+        
+        // Add collector type images
+        allAssets.push(`${process.env.PUBLIC_URL}/images/collectors/Illustration.jpg`);
+        allAssets.push(`${process.env.PUBLIC_URL}/images/collectors/Products.jpg`);
+        allAssets.push(`${process.env.PUBLIC_URL}/images/collectors/Sculpture.jpg`);
+        
+        // Add numbered collector images - based on actual file structure
+        // Numbers only, no letter prefixes
+        for (let i = 1; i <= 10; i++) {
+          // Add main collector images (1.jpg, 2.jpg, etc.)
+          allAssets.push(`${process.env.PUBLIC_URL}/images/collectors/${i}.jpg`);
+          
+          // Add English and Chinese versions if they exist
+          allAssets.push(`${process.env.PUBLIC_URL}/images/collectors/en/${i}.jpg`);
+          allAssets.push(`${process.env.PUBLIC_URL}/images/collectors/zh/${i}.jpg`);
+        }
+        
+        // Add item images
+        // Add the card back image
+        allAssets.push(`${process.env.PUBLIC_URL}/images/items/0之后开始 1-24牌背.jpg`);
+        
+        // Add numbered item images
+        for (let i = 1; i <= 24; i++) {
+          allAssets.push(`${process.env.PUBLIC_URL}/images/items/en/${i}.jpg`);
+          allAssets.push(`${process.env.PUBLIC_URL}/images/items/zh/${i}.jpg`);
         }
 
-        // If directory scanning fails, manually add known key assets
-        if (allAssets.length === 0) {
-          console.log('Directory scanning failed, adding key assets manually');
-          // Add background images
-          allAssets.push(`${process.env.PUBLIC_URL}/background/horizontal-bg.jpg`);
-          allAssets.push(`${process.env.PUBLIC_URL}/background/vertical-bg.jpg`);
-          
-          // Add sound assets
-          allAssets.push(`${process.env.PUBLIC_URL}/sounds/success.mp3`);
-          
-          // Add first 30 collector images for both languages (adjust as needed)
-          for (let i = 1; i <= 10; i++) {
-            allAssets.push(`${process.env.PUBLIC_URL}/images/collectors/i${i}.jpg`);
-            allAssets.push(`${process.env.PUBLIC_URL}/images/collectors/p${i}.jpg`);
-            allAssets.push(`${process.env.PUBLIC_URL}/images/collectors/s${i}.jpg`);
-            allAssets.push(`${process.env.PUBLIC_URL}/images/collectors/en/i${i}.jpg`);
-            allAssets.push(`${process.env.PUBLIC_URL}/images/collectors/en/p${i}.jpg`);
-            allAssets.push(`${process.env.PUBLIC_URL}/images/collectors/en/s${i}.jpg`);
-            allAssets.push(`${process.env.PUBLIC_URL}/images/collectors/zh/i${i}.jpg`);
-            allAssets.push(`${process.env.PUBLIC_URL}/images/collectors/zh/p${i}.jpg`);
-            allAssets.push(`${process.env.PUBLIC_URL}/images/collectors/zh/s${i}.jpg`);
-          }
-          
-          // Add item images (sample range - adjust as needed)
-          for (let i = 1; i <= 24; i++) {
-            allAssets.push(`${process.env.PUBLIC_URL}/images/items/en/${i}.jpg`);
-            allAssets.push(`${process.env.PUBLIC_URL}/images/items/zh/${i}.jpg`);
-          }
-        }
+        // Add translation files
+        allAssets.push(`${process.env.PUBLIC_URL}/locales/en/translation.json`);
+        allAssets.push(`${process.env.PUBLIC_URL}/locales/zh/translation.json`);
 
         setTotalAssets(allAssets.length);
         console.log(`Preloading ${allAssets.length} assets...`);
 
-        // Preload all images and audio files
+        // Preload all assets
         const preloadPromises = allAssets.map((asset) => {
-          return new Promise((resolve, reject) => {
+          return new Promise((resolve) => {
             if (asset.match(/\.(jpg|jpeg|png|gif|svg)$/i)) {
               const img = new Image();
               img.src = asset;
@@ -127,6 +101,22 @@ const AssetPreloader = ({ onLoadComplete, children }) => {
                   resolve(asset);
                 }
               }, 3000);
+            } else if (asset.match(/\.json$/i)) {
+              // Handle JSON files like translations
+              fetch(asset)
+                .then(() => {
+                  loadedCount++;
+                  setLoadedAssets(loadedCount);
+                  setLoadingProgress(Math.floor((loadedCount / allAssets.length) * 100));
+                  resolve(asset);
+                })
+                .catch(() => {
+                  console.warn(`Failed to load JSON: ${asset}`);
+                  loadedCount++;
+                  setLoadedAssets(loadedCount);
+                  setLoadingProgress(Math.floor((loadedCount / allAssets.length) * 100));
+                  resolve(asset);
+                });
             } else {
               // For other file types, just resolve
               loadedCount++;
@@ -160,6 +150,7 @@ const AssetPreloader = ({ onLoadComplete, children }) => {
     preloadImages();
   }, [onLoadComplete]);
 
+  // Loading screen remains the same
   if (isLoading) {
     return (
       <Container 
