@@ -25,7 +25,7 @@ const AssetPreloader = ({ onLoadComplete, children }) => {
         
         // Add numbered collector images - based on actual file structure
         // Numbers only, no letter prefixes
-        for (let i = 1; i <= 10; i++) {          
+        for (let i = 1; i <= 30; i++) {          
           // Add English and Chinese versions
           allAssets.push(`${process.env.PUBLIC_URL}/images/collectors/en/${i}.jpg`);
           allAssets.push(`${process.env.PUBLIC_URL}/images/collectors/zh/${i}.jpg`);
@@ -34,7 +34,7 @@ const AssetPreloader = ({ onLoadComplete, children }) => {
         // Add item images
 
         // Add numbered item images
-        for (let i = 1; i <= 24; i++) {
+        for (let i = 1; i <= 72; i++) {
           allAssets.push(`${process.env.PUBLIC_URL}/images/items/en/${i}.jpg`);
           allAssets.push(`${process.env.PUBLIC_URL}/images/items/zh/${i}.jpg`);
         }
