@@ -8,6 +8,7 @@ const AssetPreloader = ({ onLoadComplete, children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [error, setError] = useState(null);
+  const [currentAsset, setCurrentAsset] = useState('');
 
   useEffect(() => {
     const preloadImages = async () => {
@@ -49,6 +50,10 @@ const AssetPreloader = ({ onLoadComplete, children }) => {
         // Preload all assets
         const preloadPromises = allAssets.map((asset) => {
           return new Promise((resolve) => {
+            // Log the current asset being loaded
+            console.log(`Loading asset: ${asset}`);
+            setCurrentAsset(asset.split('/').pop()); // Extract filename for display
+            
             if (asset.match(/\.(jpg|jpeg|png|gif|svg)$/i)) {
               const img = new Image();
               img.src = asset;
@@ -56,10 +61,11 @@ const AssetPreloader = ({ onLoadComplete, children }) => {
                 loadedCount++;
                 setLoadedAssets(loadedCount);
                 setLoadingProgress(Math.floor((loadedCount / allAssets.length) * 100));
+                console.log(`✅ Loaded: ${asset} (${loadedCount}/${allAssets.length})`);
                 resolve(asset);
               };
               img.onerror = () => {
-                console.warn(`Failed to load image: ${asset}`);
+                console.warn(`❌ Failed to load image: ${asset}`);
                 loadedCount++;
                 setLoadedAssets(loadedCount);
                 setLoadingProgress(Math.floor((loadedCount / allAssets.length) * 100));
@@ -73,10 +79,11 @@ const AssetPreloader = ({ onLoadComplete, children }) => {
                 loadedCount++;
                 setLoadedAssets(loadedCount);
                 setLoadingProgress(Math.floor((loadedCount / allAssets.length) * 100));
+                console.log(`✅ Loaded audio: ${asset} (${loadedCount}/${allAssets.length})`);
                 resolve(asset);
               };
               audio.onerror = () => {
-                console.warn(`Failed to load audio: ${asset}`);
+                console.warn(`❌ Failed to load audio: ${asset}`);
                 loadedCount++;
                 setLoadedAssets(loadedCount);
                 setLoadingProgress(Math.floor((loadedCount / allAssets.length) * 100));
@@ -98,10 +105,11 @@ const AssetPreloader = ({ onLoadComplete, children }) => {
                   loadedCount++;
                   setLoadedAssets(loadedCount);
                   setLoadingProgress(Math.floor((loadedCount / allAssets.length) * 100));
+                  console.log(`✅ Loaded JSON: ${asset} (${loadedCount}/${allAssets.length})`);
                   resolve(asset);
                 })
                 .catch(() => {
-                  console.warn(`Failed to load JSON: ${asset}`);
+                  console.warn(`❌ Failed to load JSON: ${asset}`);
                   loadedCount++;
                   setLoadedAssets(loadedCount);
                   setLoadingProgress(Math.floor((loadedCount / allAssets.length) * 100));
@@ -119,7 +127,7 @@ const AssetPreloader = ({ onLoadComplete, children }) => {
 
         // When all assets are loaded
         await Promise.all(preloadPromises);
-        console.log('All assets preloaded!');
+        console.log('✨ All assets preloaded!');
         
         // Add a small delay to ensure UI updates before hiding the loader
         setTimeout(() => {
@@ -174,6 +182,11 @@ const AssetPreloader = ({ onLoadComplete, children }) => {
           <p style={{ fontSize: '1.2rem' }}>
             Loading {loadedAssets} of {totalAssets} assets
           </p>
+          {currentAsset && (
+            <p style={{ fontSize: '0.9rem', color: '#d0d0d0' }}>
+              Currently loading: {currentAsset}
+            </p>
+          )}
         </div>
         
         <Spinner animation="border" role="status" variant="warning" style={{ width: '4rem', height: '4rem' }}>
