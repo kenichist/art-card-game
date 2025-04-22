@@ -129,6 +129,9 @@ const AssetPreloader = ({ onLoadComplete, children }) => {
         await Promise.all(preloadPromises);
         console.log('✨ All assets preloaded!');
         
+        // Reset current asset to avoid showing the last loaded asset when done
+        setCurrentAsset('');
+        
         // Add a small delay to ensure UI updates before hiding the loader
         setTimeout(() => {
           setIsLoading(false);
@@ -137,6 +140,8 @@ const AssetPreloader = ({ onLoadComplete, children }) => {
       } catch (error) {
         console.error('Asset preloading failed:', error);
         setError('Failed to preload assets. Please refresh the page.');
+        setCurrentAsset(''); // Reset current asset in case of error too
+        
         // Continue to app anyway after a delay
         setTimeout(() => {
           setIsLoading(false);
@@ -146,7 +151,22 @@ const AssetPreloader = ({ onLoadComplete, children }) => {
     };
 
     preloadImages();
+    
+    // Cleanup function to ensure we clear current asset if component unmounts
+    return () => {
+      setCurrentAsset('');
+    };
   }, [onLoadComplete]);
+
+  // Create a message based on loading status
+  const getLoadingMessage = () => {
+    if (loadingProgress === 100) {
+      return "Finalizing...";
+    } else if (currentAsset) {
+      return `Currently loading: ${currentAsset}`;
+    }
+    return "Preparing assets...";
+  };
 
   // Loading screen remains the same
   if (isLoading) {
@@ -182,11 +202,9 @@ const AssetPreloader = ({ onLoadComplete, children }) => {
           <p style={{ fontSize: '1.2rem' }}>
             Loading {loadedAssets} of {totalAssets} assets
           </p>
-          {currentAsset && (
-            <p style={{ fontSize: '0.9rem', color: '#d0d0d0' }}>
-              Currently loading: {currentAsset}
-            </p>
-          )}
+          <p style={{ fontSize: '0.9rem', color: '#d0d0d0' }}>
+            {getLoadingMessage()}
+          </p>
         </div>
         
         <Spinner animation="border" role="status" variant="warning" style={{ width: '4rem', height: '4rem' }}>
